@@ -1,12 +1,21 @@
+aiohappyeyeballs==2.4.3
+aiohttp==3.10.10
+aiosignal==1.3.1
 asgiref @ file:///C:/b/abs_ae1n0p_8_w/croot/asgiref_1724072476516/work
+async-timeout==4.0.3
+attrs==24.2.0
 certifi==2024.8.30
 charset-normalizer==3.4.0
 Django @ file:///C:/Users/BUILDE~1/AppData/Local/Temp/abs_eeor5o9jj8/croots/recipe/django_1661292534510/work
+django-cors-headers==4.5.0
 et-xmlfile==1.1.0
+frozenlist==1.4.1
 idna==3.10
+multidict==6.1.0
 numpy==2.0.2
 openpyxl==3.1.5
 pandas==2.2.3
+propcache==0.2.0
 python-dateutil==2.9.0.post0
 pytz==2024.2
 requests==2.32.3
@@ -15,3 +24,4 @@ sqlparse @ file:///C:/b/abs_88361ub_qu/croot/sqlparse_1690904577514/work
 typing_extensions @ file:///C:/b/abs_0as9mdbkfl/croot/typing_extensions_1715268906610/work
 tzdata @ file:///croot/python-tzdata_1690578112552/work
 urllib3==2.2.3
+yarl==1.15.2

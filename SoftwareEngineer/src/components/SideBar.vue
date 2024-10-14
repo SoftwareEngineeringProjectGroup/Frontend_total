@@ -79,6 +79,14 @@
       </el-icon>
       <template #title>Setting</template>
     </el-menu-item>
+
+<!--    用来测试的-->
+<!--    <el-menu-item index="/test">-->
+<!--      <el-icon>-->
+<!--        <setting/>-->
+<!--      </el-icon>-->
+<!--      <template #title>Test</template>-->
+<!--    </el-menu-item>-->
   </el-menu>
 </template>
 

@@ -21,5 +21,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('hello', views.hello),
     path('users/dialogs/<int:id>', views.info_id),
-    path('users/dialogs/lists', views.list_id)
+    path('users/dialogs/lists', views.list_id),
+    path('ai/back/', views.proxy_generate_request)
 ]

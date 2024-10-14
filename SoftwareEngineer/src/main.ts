@@ -6,7 +6,7 @@ import 'element-plus/dist/index.css'
 import App from './App.vue'
 import axios from 'axios'
 // import VueAxios from 'vue-axios'
-import router from './router'
+import router from './router/index.js'
 
 
 axios.defaults.baseURL = 'http://127.0.0.1:5000/api';

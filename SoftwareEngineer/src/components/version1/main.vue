@@ -108,7 +108,7 @@ const getAnswer = async () => {
   // console.log("已发送", newMessage.value);
   try {
     // 向本地服务器发送 POST 请求，获取生成的数据
-    const response = await fetch("http://localhost:11434/api/generate", {
+    const response = await fetch("http://127.0.0.1:8000/ai/back/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -122,7 +122,7 @@ const getAnswer = async () => {
 
     // 检查响应是否包含 body
     if (!response.body) {
-      throw new Error("ReadableStream not supported in this environment.");
+      throw new Error("流式返回没有body");
     }
 
     // 获取响应的流式读取器
