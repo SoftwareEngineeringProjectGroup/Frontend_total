@@ -1,16 +1,31 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import axios from 'axios'
 
 defineProps<{ msg: string }>()
 
 const count = ref(0)
+
+const testAxios=()=>{
+  axios.get("/data.json")
+      .then((result) => {
+        // result不是直接的返回结果
+        console.log("数据：",result);
+        // result.data才是真正的返回结果
+        console.log("真正的数据：",result.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+}
 </script>
 
 <template>
   <h1>{{ msg }}</h1>
 
   <div class="card">
-    <button type="button" @click="count++">count is {{ count }}</button>
+    <el-button type="primary" @click="count++">count is {{ count }}</el-button>
+    <el-button type="warning" @click="testAxios">测试axios</el-button>
     <p>
       Edit
       <code>components/HelloWorld.vue</code> to test HMR
