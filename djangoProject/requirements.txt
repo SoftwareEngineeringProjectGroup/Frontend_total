@@ -1,0 +1,17 @@
+asgiref @ file:///C:/b/abs_ae1n0p_8_w/croot/asgiref_1724072476516/work
+certifi==2024.8.30
+charset-normalizer==3.4.0
+Django @ file:///C:/Users/BUILDE~1/AppData/Local/Temp/abs_eeor5o9jj8/croots/recipe/django_1661292534510/work
+et-xmlfile==1.1.0
+idna==3.10
+numpy==2.0.2
+openpyxl==3.1.5
+pandas==2.2.3
+python-dateutil==2.9.0.post0
+pytz==2024.2
+requests==2.32.3
+six==1.16.0
+sqlparse @ file:///C:/b/abs_88361ub_qu/croot/sqlparse_1690904577514/work
+typing_extensions @ file:///C:/b/abs_0as9mdbkfl/croot/typing_extensions_1715268906610/work
+tzdata @ file:///croot/python-tzdata_1690578112552/work
+urllib3==2.2.3
