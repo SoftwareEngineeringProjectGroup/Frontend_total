@@ -4,7 +4,7 @@ const getAnswer = async () => {
     // console.log("已发送", newMessage.value);
     try {
         // 向本地服务器发送 POST 请求，获取生成的数据
-        const response = await fetch("http://localhost:11434/api/generate", {
+        const response = await fetch("http://127.0.0.1:8000/ai/internet/back", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -49,6 +49,7 @@ const getAnswer = async () => {
 
                 try {
                     //解析字符串生成的是单个返回的JSON对象
+                    console.log(incompleteChunk)
                     const parsedChunk = JSON.parse(incompleteChunk);
 
                     // 将解析后的内容追加到 messages 中
@@ -59,6 +60,7 @@ const getAnswer = async () => {
                     incompleteChunk = "";
                 } catch (parseError) {
                     console.error("JSON解析失败: ", parseError);
+                    incompleteChunk = "";
                 }
             }
         }

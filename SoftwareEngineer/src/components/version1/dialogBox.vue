@@ -5,40 +5,175 @@
       ref="draggableContainer"
   >
     <div class="drag-handle" @mousedown="startDrag">
-      <el-icon><Rank /></el-icon>
+      <el-icon>
+        <Rank/>
+      </el-icon>
     </div>
-    <textarea @keydown="handleKeyDown" class="message-input" v-model="inputValue" placeholder="Please enter here" rows="1" @input="autoResize" style="height: auto;" ></textarea>
+    <input @keydown="handleKeyDown" class="message-input" v-model="inputValue" placeholder="Please enter here"
+           style="height: auto;">
     <el-button type="success" :icon="Promotion" @click="sendToMain" size="large" circle/>
-  </div>
+    <!-- 点击按钮控制语音识别的开始和停止 -->
+    <el-button
+        :type="isRecording ? 'warning' : 'primary'"
+        :icon="isRecording ? CircleClose:Microphone"
+        @click="toggleVoiceRecognition"
+        size="large"
+        :loading="isLoading"
+        circle
+    ></el-button>
+<!--    选择语音类型-->
+
+      <!-- 按钮 -->
+    <!-- 按钮 -->
+    <el-dropdown trigger="click" @command="handleCommand">
+      <el-button type="info" size="large" class="dropdown-button" circle>
+        {{audioType}}
+      </el-button>
+      <template #dropdown>
+        <el-dropdown-item command="De">Default</el-dropdown-item>
+        <el-dropdown-item command="L">Lei</el-dropdown-item>
+        <el-dropdown-item command="Di">Ding</el-dropdown-item>
+        <el-dropdown-item command="C">Cai</el-dropdown-item>
+        <el-dropdown-item command="S">Sun</el-dropdown-item>
+      </template>
+    </el-dropdown>
+
+
+    </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue'
-import {Promotion, Rank} from "@element-plus/icons-vue";
-// import {  defineEmits } from 'vue';
-
-//以下是发送信息给父组件
-
+import {ref, reactive, onBeforeMount} from 'vue'
+import {Promotion, Rank, Microphone, CircleClose} from "@element-plus/icons-vue";
+import {ElMessage} from "element-plus";
+import {useStateStore} from '@/stores/stateStore';
+// 获取 Pinia Store
+const stateStore = useStateStore();
 
 // 定义 emit 函数
 const emit = defineEmits(['send-to-main']);
 
-// 本地输入框的数据
+// 输入框的本地数据
 let inputValue = ref('');
 
 // 发送输入内容给父组件
 const sendToMain = () => {
-  console.log(`发送${inputValue.value}到main`);
+  // console.log(`发送${inputValue.value}到main`);
   emit('send-to-main', inputValue.value);
-  inputValue.value='';
+  inputValue.value = '';
+};
+
+// 语音输入的逻辑
+// 状态管理
+const isRecording = ref(false);
+const isLoading = ref(false);
+const result = ref("");
+
+// 用于存储录音的数据
+let mediaRecorder: MediaRecorder | null = null;
+let audioChunks: Blob[] = [];
+
+//初始化url
+let baseURL='';
+onBeforeMount(() => {
+  baseURL=stateStore.baseUrl; //先设置成默认音频
+
+  // console.log('Value from store:', state.value, isCollapse.value);
+});
+
+
+// 切换语音识别状态
+const toggleVoiceRecognition = () => {
+  if (isRecording.value) {
+    // 如果正在监听，停止识别
+    stopRecording();
+    console.log("停止语音识别...");
+  } else {
+    // 如果未在监听，启动识别
+    startRecording();
+    console.log("开始语音识别...");
+  }
+};
+
+// 开始录音
+const startRecording = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+    audioChunks = []; // 清空之前的音频数据
+    isRecording.value = true;
+
+    // 创建 MediaRecorder 进行音频录制
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = (event) => {
+      audioChunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      const audioBlob = new Blob(audioChunks, {type: 'audio/wav'});
+      sendAudioToApi(audioBlob); // 发送到 API
+    };
+
+    mediaRecorder.start();
+  } catch (error) {
+    console.error("无法访问麦克风:", error);
+    ErrorPop("Microphone access failed");
+  }
+};
+
+// 停止录音
+const stopRecording = () => {
+  if (mediaRecorder) {
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+    isRecording.value = false;
+  }
+};
+
+// 发送音频到 API
+const sendAudioToApi = async (audioBlob: any) => {
+  isLoading.value = true;
+  result.value = "";
+
+  // 创建 FormData 对象
+  const form = new FormData();
+  form.append("language", "en");
+  form.append("ignore_timestamps", "true");
+  form.append("audio", audioBlob, "recording.wav");
+
+  // 配置 fetch 选项
+  const options = {
+    method: 'POST',
+    headers: {
+      Authorization: ''
+    },
+    body: form
+  };
+
+  // 发送请求
+  try {
+    const response = await fetch(baseURL+'/speech/text', options);
+    const data = await response.json();
+    result.value = data.text || "未识别到任何内容"; // 假设 API 返回的识别文本字段是 text
+    console.log(result.value)
+    inputValue.value += data.text;
+  } catch (error) {
+    console.error("请求失败:", error);
+    ErrorPop("Unrecognized")
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 
+//选择音频类型
+let audioType=ref("De");
+function handleCommand(command:string) {
+  console.log('Selected:', command);
+  audioType.value=command;
+  stateStore.setaudioType(command);
+}
 
-
-
-
-//以下是挪动框实现
+// 拖动框的逻辑
 interface Position {
   x: number;
   y: number;
@@ -49,34 +184,12 @@ interface Offset {
   y: number;
 }
 
-const position = reactive<Position>({ x: window.innerWidth -900, y: window.innerHeight - 150 }) // 初始位置
-const offset = reactive<Offset>({ x: 0, y: 0 })
+const position = reactive<Position>({x: window.innerWidth - 900, y: window.innerHeight - 150}) // 初始位置
+const offset = reactive<Offset>({x: 0, y: 0})
 let isDragging = ref<boolean>(false)
 const draggableContainer = ref<HTMLDivElement | null>(null)
 
-//更改大小
-const autoResize = (event: Event): void => {
-  const target = event.target as HTMLTextAreaElement;
-  target.style.height = 'auto';
-  target.style.height = `${target.scrollHeight}px`;
-}
-
-watch(inputValue, (newValue) => {
-  const textarea = document.querySelector('.message-input') as HTMLTextAreaElement;
-  if (textarea) {
-    if (newValue === '') {
-      textarea.rows = 1; // 当 inputValue 为空时将行数设为 1
-    } else {
-      // 根据内容自适应调整高度
-      textarea.style.height = 'auto';
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }
-  }
-});
-
-
-
-//以下是拖动输入框实现
+// 拖动相关函数
 const startDrag = (event: MouseEvent): void => {
   if (draggableContainer.value) {
     const rect = draggableContainer.value.getBoundingClientRect()
@@ -88,10 +201,9 @@ const startDrag = (event: MouseEvent): void => {
   }
 }
 
-
 const onDrag = (event: MouseEvent): void => {
   if (isDragging.value) {
-    // 限制输入框的移动范围，使其在窗口可见区域内
+    // 限制拖动范围
     position.x = Math.max(0, Math.min(event.clientX - offset.x, window.innerWidth - (draggableContainer.value?.offsetWidth || 0)));
     position.y = Math.max(0, Math.min(event.clientY - offset.y, window.innerHeight - (draggableContainer.value?.offsetHeight || 0)));
   }
@@ -103,13 +215,23 @@ const endDrag = (): void => {
   document.removeEventListener('mouseup', endDrag)
 }
 
-
+// 按下 Enter 键触发发送消息
 const handleKeyDown = (event: KeyboardEvent) => {
-  if (event.ctrlKey && event.key === 'Enter') {
-    sendToMain(); // 当按下 Ctrl + Enter 时发送消息
+  if (event.key === 'Enter') {
+    sendToMain();
   }
 };
+
+//错误弹窗
+const ErrorPop = (info: string) => {
+  ElMessage({
+    showClose: true,
+    message: info,
+    type: 'error',
+  })
+}
 </script>
+
 
 <style scoped>
 .draggable-container {
@@ -153,8 +275,11 @@ const handleKeyDown = (event: KeyboardEvent) => {
 }
 
 
-
 .send-button svg {
   fill: #000;
+}
+
+.dropdown-button {
+  margin-left: 10px; /* 根据需求调整间距，例如10px */
 }
 </style>

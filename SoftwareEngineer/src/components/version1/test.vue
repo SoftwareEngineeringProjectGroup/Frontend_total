@@ -7,9 +7,9 @@
       </div>
 
 <!--      主体-->
-      <el-main class="content-container" :style="{ marginLeft: marginLeftValue + 'px' }">
+      <div class="content-container" :style="{ marginLeft: marginLeftValue + 'px' }">
         <Main/>
-      </el-main>
+      </div>
 
   </div>
 </template>

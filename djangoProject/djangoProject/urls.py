@@ -22,5 +22,10 @@ urlpatterns = [
     path('hello', views.hello),
     path('users/dialogs/<int:id>', views.info_id),
     path('users/dialogs/lists', views.list_id),
-    path('ai/back/', views.proxy_generate_request)
+    path('ai/back', views.proxy_generate_request),
+
+    path("ai/internet/back", views.connect_internet),
+    path("file/back", views.generate_bubble_sort_file),
+    path("speech/text", views.speechToText),
+    path("text/speech", views.generate_audio)
 ]
