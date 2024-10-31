@@ -134,30 +134,20 @@ const goBack = () => {
   display: flex;
   font-family: Arial, sans-serif;
   height: 100vh;
+  width: 100vw; /* 确保占据整个窗口宽度 */
+  background-color: white; /* 设置整体背景颜色为白色 */
 }
 
 .sidebar {
-  background-color: #f0f4f8;
-  width: 20%;
-  padding: 20px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: width 0.3s;
+  background-color: transparent; /* 使侧边栏背景透明，继承主背景 */
+}
+
+.content {
+  background-color: transparent; /* 主内容区背景透明 */
 }
 
 .sidebar.collapsed {
   width: 60px;
-}
-
-.content {
-  width: 80%;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 .dialogue-box {
@@ -276,7 +266,7 @@ button:hover {
 }
 
 .visualization-background {
-  background-color: #AFEEEE;
+  background-color: #eeffff;
   width: 1000px;
   height: 500px;
   display: flex;
@@ -287,7 +277,7 @@ button:hover {
 }
 
 .photo-recognition-background {
-  background-color: #7FFFD4;
+  background-color: #f0fffa;
   width: 1000px;
   height: 400px;
   display: flex;
