@@ -3,7 +3,6 @@
   "private": true,
   "main": "electron/main.js",
   "version": "0.0.0",
-
   "scripts": {
     "start": "electron .",
     "dev": "vite",
@@ -15,6 +14,7 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
     "axios": "^1.7.7",
+    "echarts": "^5.5.1",
     "element-plus": "^2.8.4",
     "emoji-regex": "^10.4.0",
     "github-markdown-css": "^5.7.0",

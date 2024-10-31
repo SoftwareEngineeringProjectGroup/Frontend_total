@@ -94,8 +94,22 @@ const increaseMargin = () => {
 }
 
 .back_color {
-  height: 100%; /* 示例高度 */
-  background: linear-gradient(135deg, #8fefdd, #acb6e5);
+  height: 100vh;
+  background: linear-gradient(135deg, #8fefdd, #5eb3ff, #b78cff, #ff9de2);
+  background-size: 400% 400%; /* 放大背景尺寸 */
+  animation: gradient-flow 7s ease infinite; /* 默认不流动 */
+}
+
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 

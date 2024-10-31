@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    ChartComponent: typeof import('./src/components/dietitian_page/ChartComponent.vue')['default']
     DialogBox: typeof import('./src/components/version1/dialogBox.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCollapse: typeof import('element-plus/es')['ElCollapse']
