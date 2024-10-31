@@ -218,7 +218,7 @@ const goToPage = (page: string) => {
   padding: 10px; /* 组件内边距 */
   color: white; /* 字体颜色 */
   margin: 20px auto; /* 上下边距 */
-  margin-top: 10vh; /* 设置距离页面顶部10vh的位置 */
+  margin-top: 5vh; /* 设置距离页面顶部10vh的位置 */
   width: 95%; /* 设置宽度为90%，居中显示 */
 }
 
@@ -240,7 +240,7 @@ const goToPage = (page: string) => {
   text-align: center; /* 标题居中 */
   color: white; /* 标题字体颜色 */
   font-weight: bold; /* 加粗标题 */
-  margin-top: 20px;
+  margin-top: 30px;
 }
 
 

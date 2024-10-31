@@ -159,7 +159,7 @@ const sendAudioToApi = async (audioBlob: any) => {
   try {
     const response = await fetch(baseURL+'/speech/text', options);
     const data = await response.json();
-    result.value = data.text || "未识别到任何内容"; // 假设 API 返回的识别文本字段是 text
+    result.value = data.text || ErrorPop("No voice input detected"); // 假设 API 返回的识别文本字段是 text
     console.log(result.value)
     inputValue.value += data.text;
   } catch (error) {
