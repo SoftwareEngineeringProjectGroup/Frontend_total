@@ -29,7 +29,7 @@ const stateStore = useStateStore();
 
 
 onBeforeMount(() => {
-  stateStore.isOpenValue ? marginLeftValue.value = 240 : marginLeftValue.value = 60;
+  stateStore.isOpenValue ? marginLeftValue.value = 240 : marginLeftValue.value = 75;
 
   // console.log('Value from store:', state.value, isCollapse.value);
 });
@@ -44,7 +44,7 @@ watch(() => stateStore.isOpenValue, (newValue) => {
 // 渐渐减小 margin-left 的方法
 const decreaseMargin = () => {
   let interval = setInterval(() => {
-    if (marginLeftValue.value > 70) { // 最小的 margin-left 值
+    if (marginLeftValue.value > 75) { // 最小的 margin-left 值
       marginLeftValue.value -= 10;
     } else {
       clearInterval(interval);

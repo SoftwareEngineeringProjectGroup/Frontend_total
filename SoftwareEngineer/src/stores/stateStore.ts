@@ -7,7 +7,7 @@ export const useStateStore = defineStore('state', {
         userImagePath: "./static/userDefault.jpg", // 存储用户图片路径
         aiImagePath: "./static/aiDefault.jpg", // 存储ai图片路径
         audioType: 'D', // 音频类型
-        baseUrl: "http://10.253.28.119:8000",//IPv4地址
+        baseUrl: "http://127.0.0.1:8000",//IPv4地址
     }),
     actions: {
         setisOpenValue(newValue: number) {

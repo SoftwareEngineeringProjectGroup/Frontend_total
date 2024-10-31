@@ -1,6 +1,7 @@
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from fish_audio_sdk import Session, TTSRequest, ASRRequest
 from io import BytesIO
+import time
 
 
 def generate_audio(request):
@@ -18,6 +19,7 @@ def generate_audio(request):
             # 获取请求体中的 JSON 数据
             data = request.POST
             text = data.get("text", "")
+            print(text)
             ref_id = dic1[data.get("id", "De")]
             # print(text)
             if not text:
@@ -59,6 +61,9 @@ def speechToText(request):
         session = Session("7fb2606c76044e31ac929852eff46742")
         response = session.asr(ASRRequest(audio=audio_data))
         # c = time.time()
+        # print(c-b)
+        if response.text == ".":
+            response.text = ""
 
         return JsonResponse({'text': response.text}, status=200)
     else:
