@@ -28,7 +28,8 @@
         </div>
         <div class="message-time">{{ message.time }}
           <!-- 添加语音播放按钮 -->
-          <button v-if="!message.isUser" class="speech-button right-aligned" @click="fetchAndPlayAudio(message.text)">🔊
+          <button v-if="!message.isUser && !message.loading" class="speech-button right-aligned"
+                  @click="fetchAndPlayAudio(message.text)">🔊
             Play Voice
           </button>
 
@@ -43,7 +44,7 @@
 </template>
 
 <script setup>
-import {ref, nextTick, computed, onBeforeMount} from 'vue';
+import {ref, nextTick, computed, onBeforeMount, createCommentVNode} from 'vue';
 import MarkdownIt from 'markdown-it'; //渲染markdown
 import hljs from 'highlight.js'; // 引入代码高亮库
 import 'github-markdown-css';
@@ -51,11 +52,14 @@ import {useStateStore} from "@/stores/stateStore.ts"; //状态获取
 import 'highlight.js/styles/github.css'; // 确保引入样式文件
 import axios from 'axios';
 import emojiRegex from 'emoji-regex'; //去除emoji
+//图片
+
+
 // 使用 ref 定义响应式变量
-const userAvatar = ref("/static/userDefault.jpg");  // 用户头像
-const aiAvatar = ref("/static");      // AI 头像
+const userAvatar = ref("./static/userDefault.jpg");  // 用户头像
+const aiAvatar = ref("./static");      // AI 头像
 const messages = ref([
-  {text: 'Who are you？', isUser: true, time: '2024/10/11 16:39:40', loading: false},
+  {text: 'Who are you？', isUser: true, time: '2024/10/11 16:39', loading: false},
   {
     text: '##  👋 Hi! This is your local AI assistant.\n' +
         '\n' +
@@ -63,7 +67,7 @@ const messages = ref([
         '\n' +
         '**No need to worry about the network connection, no need to use the Internet** As long as you input your ideas or questions, I will do my best to help you.',
     isUser: false,
-    time: '2024/10/11 16:39:41',
+    time: '2024/10/11 16:39',
     loading: false
   },
   // {text: 'Who are you？What is your name', isUser: false, time: '2024/10/12 16:39:40', loading: false},
@@ -128,7 +132,13 @@ const sendAIMessage = async () => {
     messages.value.push({
       text: '',
       isUser: false,
-      time: new Date().toLocaleString(),
+      time: new Date().toLocaleString('default', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      }),
       loading: true
     });
     await scrollToBottom();
@@ -137,75 +147,154 @@ const sendAIMessage = async () => {
 
   }, 500);
 };
+
+
+// const getAnswer = async () => {
+//   const timeout = 10000; // 设置超时时间（以毫秒为单位，例如10秒）
+//
+//   const timeoutPromise = new Promise((_, reject) =>
+//       setTimeout(() => reject(new Error("请求超时")), timeout)
+//   );
+//
+//   // 尝试在指定的超时时间内完成 fetch 请求
+//   try {
+//     scrollToBottom();
+//
+//     const response = await Promise.race([
+//       fetch(baseURL + "/ai/back", {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify({
+//           model: "gemma2:2b",
+//           prompt: newMessage.value,
+//         }),
+//       }),
+//       timeoutPromise, // 如果 fetch 未完成，此 promise 将优先返回超时错误
+//     ]);
+//
+//     if (!response.body) {
+//       throw new Error("流式返回没有body");
+//     }
+//
+//     const reader = response.body.getReader();
+//     const decoder = new TextDecoder("utf-8");
+//     let done = false;
+//     let incompleteChunk = ""; // 用于存储未完整解析的数据块
+//
+//     messages.value[messages.value.length - 1].loading = false; // 解除加载
+//
+//     while (!done) {
+//       const {value, done: readerDone} = await reader.read();
+//       done = readerDone;
+//
+//       if (value) {
+//         const chunk = decoder.decode(value, {stream: true});
+//         incompleteChunk += chunk;
+//
+//         try {
+//           console.log(incompleteChunk,typeof incompleteChunk);
+//           const parsedChunk = JSON.parse(incompleteChunk);
+//           console.log(incompleteChunk,typeof incompleteChunk);
+//           messages.value[messages.value.length - 1].text += parsedChunk.response;
+//           scrollToBottom();
+//           incompleteChunk = "";
+//         } catch (parseError) {
+//           console.error("JSON解析失败: ", parseError);
+//           ErrorPop("Model returns error");
+//           deleteMessage(messages.value.length-1);
+//           return;
+//         }
+//       }
+//     }
+//     scrollToBottom();
+//     console.log("流结束");
+//   } catch (error) {
+//     console.error("错误: ", error);
+//     // messages.value[messages.value.length - 1].loading = false;
+//     messages.value.pop()//直接删去最后一个
+//     if (error.message === "请求超时") {
+//       ErrorPop("Timeout");
+//     } else {
+//       ErrorPop("404 Warning");
+//     }
+//   }
+// };
+
 const getAnswer = async () => {
-  // console.log("已发送", newMessage.value);
-  scrollToBottom();
+  const timeout = 10000; // 设置超时时间（以毫秒为单位，例如10秒）
+
+  const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("请求超时")), timeout)
+  );
+
   try {
-    // 向本地服务器发送 POST 请求，获取生成的数据
-    const response = await fetch(baseURL+"/ai/back", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gemma2:2b",
-        prompt: newMessage.value,
+    scrollToBottom();
+
+    const response = await Promise.race([
+      fetch(baseURL + "/ai/back", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gemma2:2b",
+          prompt: newMessage.value,
+        }),
       }),
-    });
+      timeoutPromise, // 如果 fetch 未完成，此 promise 将优先返回超时错误
+    ]);
 
-
-    // 检查响应是否包含 body
     if (!response.body) {
       throw new Error("流式返回没有body");
     }
 
-    // 获取响应的流式读取器
-    //response.body 是一个流式的接口，通过 getReader() 来逐步读取到服务器返回的数据。在流结束之前，数据是分段到达的，并不是一次性获取到完整的响应
-    //reader类似于一个生成器
     const reader = response.body.getReader();
-
-    //创造解码器对象
     const decoder = new TextDecoder("utf-8");
     let done = false;
 
-    let incompleteChunk = ""; // 用于存储未完整解析的数据块
+    messages.value[messages.value.length - 1].loading = false; // 解除加载
 
-    messages.value[messages.value.length - 1].loading = false; //读取到解除加载
-    // 循环读取响应数据，直到读取完成
     while (!done) {
-      const {value, done: readerDone} = await reader.read();
+      const { value, done: readerDone } = await reader.read();
       done = readerDone;
 
       if (value) {
-        // 将数据块解码为字符串
-        const chunk = decoder.decode(value, {stream: true});
-        //存储字符串
-        incompleteChunk += chunk;
+        // 解码数据块并按行分割
+        const chunk = decoder.decode(value, { stream: true });
+        console.log("chunk",chunk);
+        const lines = chunk.split("\n");
+        console.log("lines",lines);
 
-
-        try {
-          //解析字符串生成的是单个返回的JSON对象
-          const parsedChunk = JSON.parse(incompleteChunk);
-
-          // 将解析后的内容追加到 messages 中
-          messages.value[messages.value.length - 1].text += parsedChunk.response;
-
-          scrollToBottom();//滚动
-          // 重置未解析的部分
-          incompleteChunk = "";
-        } catch (parseError) {
-          console.error("JSON解析失败: ", parseError);
-          ErrorPop('Model returns error');
-        }
+        // 逐行解析并处理
+        lines.forEach((line) => {
+          if (line.trim()) { // 忽略空行
+            try {
+              const parsedChunk = JSON.parse(line);
+              messages.value[messages.value.length - 1].text += parsedChunk.response;
+              scrollToBottom();
+            } catch (parseError) {
+              console.warn("JSON解析失败，跳过该行: ", line);
+            }
+          }
+        });
       }
     }
+
     scrollToBottom();
-    // console.log(messages.value[messages.value.length - 1].text)
-    console.log("流结束"); // 打印流结束的消息
+    console.log("流结束");
   } catch (error) {
-    console.error("错误: ", error); // 打印错误信息
+    console.error("错误: ", error);
+    messages.value.pop(); //直接删去最后一个
+    if (error.message === "请求超时") {
+      ErrorPop("Timeout");
+    } else {
+      ErrorPop("404 Warning");
+    }
   }
 };
+
 
 
 //返回markdown
@@ -236,13 +325,14 @@ const fetchAndPlayAudio = async (text) => {
   text = org(text);
   if (audioType === "De") speakMessage(text);
   else {
+    SuccPop("Generating...",5000);
     const startTime = performance.now();
     try {
       const formData = new FormData();
       formData.append("text", text);
       formData.append("id", audioType);
 
-      const response = await axios.post(baseURL+'/text/speech', formData, {
+      const response = await axios.post(baseURL + '/text/speech', formData, {
         responseType: 'blob'  // 指定返回类型为 Blob
       });
 
@@ -254,13 +344,14 @@ const fetchAndPlayAudio = async (text) => {
       const audioBlob = response.data;
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
+      // closeSuccMessage();
       audio.play();
 
       // 监听音频播放结束，释放 Blob URL
-      // audio.onended = () => {
-      //   URL.revokeObjectURL(audioUrl);  // 释放 URL
-      //   console.log('Audio URL revoked');
-      // };
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);  // 释放 URL
+        console.log('Audio URL revoked');
+      };
 
       const endTime = performance.now();
       console.log(`Audio fetched and played in ${(endTime - startTime).toFixed(2) / 1000} seconds.`);
@@ -297,9 +388,9 @@ const speakMessage = (text) => {
     // 选择语音 (可根据需要进行自定义)
     const voices = synth.getVoices();
     utterThis.voice = voices.find(voice => voice.lang === 'en-US') || voices[0];
-
     synth.speak(utterThis);
   }
+
 };
 
 //头像载入和音频初始化和url初始化
@@ -308,7 +399,7 @@ onBeforeMount(() => {
   aiAvatar.value = stateStore.aiImagePath;
   userAvatar.value = stateStore.userImagePath;
   stateStore.setaudioType("De"); //先设置成默认音频
-  baseURL=stateStore.baseUrl; //先设置成默认音频
+  baseURL = stateStore.baseUrl; //先设置成默认url
 
   // console.log('Value from store:', state.value, isCollapse.value);
 });
@@ -338,11 +429,26 @@ const handleReceivedInput = (inputValue) => {
 };
 
 //错误弹窗
-const ErrorPop = (info) => {
+const ErrorPop = (info,time=3000) => {
   ElMessage({
     showClose: true,
     message: info,
     type: 'error',
+    duration:time
+  })
+}
+
+//音频的互动ui逻辑
+
+
+
+//成功弹窗
+const SuccPop = (info,time=2000) => {
+  ElMessage({
+    showClose: true,
+    message: info,
+    type: 'success',
+    duration:time
   })
 }
 
@@ -350,6 +456,12 @@ const ErrorPop = (info) => {
 const deleteMessage = (index) => {
   messages.value.splice(index, 1);
 };
+
+//web speech api
+// const synth = window.speechSynthesis;
+// onBeforeUnmount(() => {
+//   synth.cancel(); // 取消任何正在进行的语音播放
+// });
 
 
 </script>
@@ -360,8 +472,8 @@ const deleteMessage = (index) => {
   display: flex;
   flex-direction: column;
   padding: 0px;
-  margin-top: 10px; /* 让容器与顶部保持距离 */
-  height: calc(96vh - 10px); /* 调整高度，以适应新的margin-top */
+  margin-top: 20px; /* 让容器与顶部保持距离 */
+  height: calc(100vh - 20px); /* 调整高度，以适应新的margin-top */
   overflow-y: auto;
   flex-grow: 1;
   scroll-behavior: smooth;

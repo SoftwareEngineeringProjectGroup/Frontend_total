@@ -4,10 +4,10 @@ import {defineStore} from 'pinia';
 export const useStateStore = defineStore('state', {
     state: () => ({
         isOpenValue: 0, //状态栏是否收缩
-        userImagePath: "/static/userDefault.jpg", // 存储用户图片路径
-        aiImagePath: "/static/aiDefault.jpg", // 存储ai图片路径
+        userImagePath: "./static/userDefault.jpg", // 存储用户图片路径
+        aiImagePath: "./static/aiDefault.jpg", // 存储ai图片路径
         audioType: 'D', // 音频类型
-        baseUrl: "http://10.253.58.74:8000",//IPv4地址
+        baseUrl: "http://10.253.28.119:8000",//IPv4地址
     }),
     actions: {
         setisOpenValue(newValue: number) {
@@ -22,7 +22,9 @@ export const useStateStore = defineStore('state', {
         setaudioType(newValue: string) {
             this.audioType = newValue;
         },
-
+        setbaseUrl(newValue: string) {
+            this.baseUrl = newValue;
+        },
     },
 });
 

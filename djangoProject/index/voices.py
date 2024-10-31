@@ -10,6 +10,9 @@ def generate_audio(request):
                 "Di": "54a5170264694bfc8e9ad98df7bd89c3",
                 "C": "e4642e5edccd4d9ab61a69e82d4f8a14",
                 "S": "e80ea225770f42f79d50aa98be3cedfc",
+                "P": "665e031efe27435780ebfa56cc7e0e0d",
+                "B": "99503144194c45ed8fb998ceac181dcc",
+                "N": "3d1cb00d75184099992ddbaf0fdd7387",
                 "De": ""}
         try:
             # 获取请求体中的 JSON 数据
@@ -30,7 +33,7 @@ def generate_audio(request):
 
             # 设置响应
             response = HttpResponse(audio_buffer.getvalue(), content_type='audio/mpeg')
-            response['Content-Disposition'] = 'inline; filename="output.mp3"'
+            # response['Content-Disposition'] = 'inline; filename="output.mp3"'
             return response
 
         except Exception as e:

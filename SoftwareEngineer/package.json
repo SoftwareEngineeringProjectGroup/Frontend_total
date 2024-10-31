@@ -1,16 +1,16 @@
 {
   "name": "softwareengineer",
   "private": true,
-  "main": "main.js",
+  "main": "electron/main.js",
   "version": "0.0.0",
-  "type": "module",
+
   "scripts": {
     "start": "electron .",
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "vue-tsc -b && vite build && electron-builder"
+    "electron:build": "vite build && electron-builder"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
@@ -30,11 +30,12 @@
     "vue-router": "^4.4.5"
   },
   "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
     "@vitejs/plugin-vue": "^5.1.4",
     "@vue/compiler-sfc": "^3.5.12",
     "concurrently": "^8.0.0",
     "electron": "^32.1.2",
-    "electron-builder": "^24.6.0",
+    "electron-builder": "^25.1.8",
     "typescript": "^5.5.3",
     "vite": "^5.4.8",
     "vue-tsc": "^2.1.6",
@@ -42,25 +43,21 @@
   },
   "build": {
     "appId": "com.example.softwareengineer",
-    "productName": "SoftwareEngineerApp",
+    "productName": "Lambda",
     "directories": {
       "output": "dist_electron"
     },
     "files": [
       "dist/**/*",
-      "main.js"
+      "electron/**/*"
     ],
     "win": {
       "target": "nsis",
-      "icon": "build/icon.ico"
+      "icon": "public/img1.ico"
     },
     "mac": {
       "target": "dmg",
-      "icon": "build/icon.icns"
-    },
-    "linux": {
-      "target": "AppImage",
-      "icon": "build/icons"
+      "icon": "public/img.icns"
     }
   }
 }

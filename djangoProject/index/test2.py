@@ -39,17 +39,18 @@ def proxy_generate_request(request):
                             # print(f"匹配到的内容: {response_content}")
                             # print(chunk.decode('utf-8'))
                             complete_response += response_content
+                            # print(json.dumps({"response": response_content}))
+                            yield chunk  # 同时返回bytes给前端
                         else:
                             print("没有找到匹配的内容")
                         # full_response_content.append(json.load(chunk.decode('utf-8'))["response"])  # 返回是utf-8编码
 
-                        yield chunk  # 同时返回bytes给前端
             finally:
                 # 在所有的chunk都处理完毕后，将完整的响应内容组合成一个字符串
                 complete_response = complete_response.replace('\\n', '\n')
 
-
-        # 将流式数据逐步返回给前端
+        #
+        # # 将流式数据逐步返回给前端
         streaming_response = StreamingHttpResponse(stream_response(), content_type=response.headers.get('Content-Type'))
 
         # 将完整的响应内容组合成一个字符串
@@ -59,6 +60,8 @@ def proxy_generate_request(request):
         # 比如写日志：
 
         return streaming_response
+
+
 
 
 def info_handle(str0, target=1):

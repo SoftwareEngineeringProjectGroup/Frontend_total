@@ -35,6 +35,9 @@
         <el-dropdown-item command="Di">Ding</el-dropdown-item>
         <el-dropdown-item command="C">Cai</el-dropdown-item>
         <el-dropdown-item command="S">Sun</el-dropdown-item>
+        <el-dropdown-item command="P">Pang</el-dropdown-item>
+        <el-dropdown-item command="B">Bei</el-dropdown-item>
+        <el-dropdown-item command="N">Nai</el-dropdown-item>
       </template>
     </el-dropdown>
 
@@ -76,9 +79,12 @@ let audioChunks: Blob[] = [];
 //初始化url
 let baseURL='';
 onBeforeMount(() => {
-  baseURL=stateStore.baseUrl; //先设置成默认音频
+  if(stateStore.baseUrl=="0"){
+    ErrorPop("Please set an IPv4 address",5000)
+  }
+  baseURL=stateStore.baseUrl;
 
-  // console.log('Value from store:', state.value, isCollapse.value);
+
 });
 
 
@@ -223,11 +229,12 @@ const handleKeyDown = (event: KeyboardEvent) => {
 };
 
 //错误弹窗
-const ErrorPop = (info: string) => {
+const ErrorPop = (info: string,time=3000) => {
   ElMessage({
     showClose: true,
     message: info,
     type: 'error',
+    duration:time
   })
 }
 </script>
@@ -245,6 +252,7 @@ const ErrorPop = (info: string) => {
   border: 1px solid #ddd;
   cursor: move;
   transition: box-shadow 0.3s ease, transform 0.3s ease;
+  justify-content: center;  /* 水平居中 */
 }
 
 .draggable-container:hover {
