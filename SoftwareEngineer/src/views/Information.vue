@@ -1,11 +1,24 @@
-<script setup lang="ts">
-import SideBar from "@/components/SideBar.vue";
-</script>
+<!--<script setup lang="ts">-->
+<!--import SideBar from "@/components/SideBar.vue";-->
+<!--</script>-->
 
+<!--<template>-->
+<!--  <SideBar/>-->
+<!--</template>-->
+
+<!--<style scoped>-->
+
+<!--</style>-->
 <template>
-  <SideBar/>
+  <div>
+    <button @click="openFloating">Open Floating Window</button>
+  </div>
 </template>
 
-<style scoped>
+<script setup>
+function openFloating() {
 
-</style>
+  window.electronAPI.openFloatingWindow();
+  console.log("已按下");
+}
+</script>

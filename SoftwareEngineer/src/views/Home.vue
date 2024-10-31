@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import SideBar from "@/components/SideBar.vue";
+import Gather from "@/components/home_page/gather.vue";
 </script>
 
 <template>
-  <SideBar/>
+  <Gather/>
 </template>
 
 <style scoped>
 
 </style>
+

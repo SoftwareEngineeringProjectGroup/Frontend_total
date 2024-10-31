@@ -1,13 +1,13 @@
 <template>
-  <el-button :type="type" @click="change" round class="top-button">{{ text }}</el-button>
+  <div>
+<!--  <el-button :type="type" @click="change" round class="top-button">{{ text }}</el-button>-->
   <!--  <button @click="send0">点</button>-->
   <el-menu
       :default-active="$route.path"
       class="el-menu-vertical-demo"
       :collapse="isCollapse"
       router
-      @open="handleOpen"
-      @close="handleClose"
+
   >
     <!-- 首页 -->
     <el-menu-item index="/">
@@ -79,15 +79,21 @@
       </el-icon>
       <template #title>Setting</template>
     </el-menu-item>
+<!--    <el-button :type="type" @click="change" round class="top-button">{{ text }}</el-button>-->
 
-<!--    用来测试的-->
-<!--    <el-menu-item index="/test">-->
-<!--      <el-icon>-->
-<!--        <setting/>-->
-<!--      </el-icon>-->
-<!--      <template #title>Test</template>-->
-<!--    </el-menu-item>-->
+<!--    展开按钮-->
+    <el-menu-item @click="change">
+      <el-icon v-if="isCollapse">
+        <ArrowRightBold/>
+      </el-icon>
+      <el-icon v-else>
+        <ArrowLeftBold/>
+      </el-icon>
+      <template #title>{{text}}</template>
+    </el-menu-item>
+
   </el-menu>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -101,12 +107,14 @@ import {
   SwitchFilled,
   ChatDotSquare,
   Monitor,
-  DishDot
+  DishDot,
+  ArrowRightBold,
+  ArrowLeftBold
 } from '@element-plus/icons-vue'
 
 const isCollapse = ref<boolean | null>(null) // 是否伸缩
-let text = ref<string | null>(null) // 按钮上的字
-let type = ref<string | null>(null)
+let text = ref<string | null>(null) // 标签上的字
+// let type = ref<string | null>(null)
 
 
 // 获取 Pinia Store
@@ -121,12 +129,11 @@ onBeforeMount(() => {
 
   if (state.value) {
     isCollapse.value = false;
-    text.value = "collapse";
-    type.value = "primary"
+    text.value = "Collapse";
+
   } else {
     isCollapse.value = true;
-    text.value = "expand";
-    type.value = "success"
+    text.value = "Expand";
 
   }
   // console.log('Value from store:', state.value, isCollapse.value);
@@ -136,13 +143,12 @@ onBeforeMount(() => {
 //伸缩变色和字
 const change = () => {
   isCollapse.value = !isCollapse.value
-  if (text.value === "expand") {
-    text.value = "collapse"
-    type.value = "primary"
+  if (text.value === "Expand") {
+    text.value = "Collapse"
+
     stateStore.setisOpenValue(1);
   } else {
-    text.value = "expand";
-    type.value = "success";
+    text.value = "Expand";
     stateStore.setisOpenValue(0);
   }
   // console.log("变化后", stateStore.value, isCollapse.value);
@@ -151,12 +157,12 @@ const change = () => {
 
 
 // 伸缩触发
-const handleOpen = (key: string, keyPath: string[]) => {
-  // console.log(key, keyPath)
-}
-const handleClose = (key: string, keyPath: string[]) => {
-  // console.log(key, keyPath)
-}
+// const handleOpen = (key: string, keyPath: string[]) => {
+//   // console.log(key, keyPath)
+// }
+// const handleClose = (key: string, keyPath: string[]) => {
+//   // console.log(key, keyPath)
+// }
 </script>
 
 <style>
@@ -166,7 +172,7 @@ const handleClose = (key: string, keyPath: string[]) => {
 }
 
 .el-menu-vertical-demo:not(.el-menu--expand) {
-  min-height: 670px;
+  min-height: 100vh;
 }
 
 .el-menu-vertical-demo {

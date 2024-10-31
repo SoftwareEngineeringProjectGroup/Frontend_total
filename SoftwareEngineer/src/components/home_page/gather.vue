@@ -1,15 +1,12 @@
 <template>
-  <!--  <div class="common-layout page-content" :style="pageStyle">-->
-  <!--    <button @click="toggleInvert">切换主题</button>-->
-  <!--    状态栏-->
   <div class="back_color">
     <div class="left">
-      <Left/>
+      <SideBar/>
     </div>
 
     <!--      主体-->
     <div class="content-container" :style="{ marginLeft: marginLeftValue + 'px' }">
-      <Main/>
+      <Home1/>
     </div>
 
   </div>
@@ -17,9 +14,9 @@
 
 
 <script setup lang="ts">
-import {onBeforeMount, ref, watch, computed} from 'vue'
-import Main from './main_container.vue'
-import Left from "../SideBar.vue";
+import SideBar from "@/components/SideBar.vue";
+import Home1 from "@/components/home_page/home1.vue";
+import {onBeforeMount, ref, watch} from "vue";
 import {useStateStore} from "@/stores/stateStore.ts";
 
 let marginLeftValue = ref(100)
@@ -29,7 +26,7 @@ const stateStore = useStateStore();
 
 
 onBeforeMount(() => {
-  stateStore.isOpenValue ? marginLeftValue.value = 240 : marginLeftValue.value = 60;
+  stateStore.isOpenValue ? marginLeftValue.value = 200 : marginLeftValue.value = 69;
 
   // console.log('Value from store:', state.value, isCollapse.value);
 });
@@ -44,7 +41,7 @@ watch(() => stateStore.isOpenValue, (newValue) => {
 // 渐渐减小 margin-left 的方法
 const decreaseMargin = () => {
   let interval = setInterval(() => {
-    if (marginLeftValue.value > 70) { // 最小的 margin-left 值
+    if (marginLeftValue.value > 69) { // 最小的 margin-left 值
       marginLeftValue.value -= 10;
     } else {
       clearInterval(interval);
@@ -55,26 +52,15 @@ const decreaseMargin = () => {
 // 渐渐增加 margin-left 的方法
 const increaseMargin = () => {
   let interval = setInterval(() => {
-    if (marginLeftValue.value < 240) { // 最大的 margin-left 值
+    if (marginLeftValue.value < 200) { // 最大的 margin-left 值
       marginLeftValue.value += 20;
     } else {
       clearInterval(interval);
     }
   }, 20); // 每 30 毫秒调整10
 };
-
-// const isInverted = ref(false)
-
-// 计算属性，动态应用反转样式
-// const pageStyle = computed(() => ({
-//   filter: isInverted.value ? 'invert(1)' : 'none'
-// }))
-
-// 切换颜色反转的函数
-// const toggleInvert = () => {
-//   isInverted.value = !isInverted.value
-// }
 </script>
+
 
 <style scoped>
 .left {
@@ -94,10 +80,13 @@ const increaseMargin = () => {
 }
 
 .back_color {
-  height: 100vh;
-  background: linear-gradient(135deg, #8fefdd, #5eb3ff, #b78cff, #ff9de2);
+  width: 100vw; /* 视口宽度 */
+  height: 100vh; /* 视口高度 */
+  background: linear-gradient(135deg, #4f5bd5, #962fbf, #d62976, #f58529, #ffcc70);
+  overflow: hidden; /* 防止滚动条 */
+  margin: 0;
   background-size: 400% 400%; /* 放大背景尺寸 */
-  animation: gradient-flow 7s ease infinite; /* 默认不流动 */
+  animation: gradient-flow 7s ease infinite; /* 更快的动画速度 */
 }
 
 @keyframes gradient-flow {
@@ -111,6 +100,5 @@ const increaseMargin = () => {
     background-position: 0% 50%;
   }
 }
-
 
 </style>
