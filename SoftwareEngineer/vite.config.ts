@@ -5,6 +5,7 @@ import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import {ElementPlusResolver} from 'unplugin-vue-components/resolvers'
 import {fileURLToPath, URL} from "node:url";
+import svgLoader from 'vite-svg-loader';
 
 
 export default defineConfig({
@@ -16,6 +17,7 @@ export default defineConfig({
         Components({
             resolvers: [ElementPlusResolver()],
         }),
+        svgLoader() // 加入 vite-svg-loader
     ],
     resolve: {
         alias: {

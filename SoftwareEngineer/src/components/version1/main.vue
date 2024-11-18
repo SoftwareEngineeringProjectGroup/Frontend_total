@@ -149,78 +149,6 @@ const sendAIMessage = async () => {
 };
 
 
-// const getAnswer = async () => {
-//   const timeout = 10000; // 设置超时时间（以毫秒为单位，例如10秒）
-//
-//   const timeoutPromise = new Promise((_, reject) =>
-//       setTimeout(() => reject(new Error("请求超时")), timeout)
-//   );
-//
-//   // 尝试在指定的超时时间内完成 fetch 请求
-//   try {
-//     scrollToBottom();
-//
-//     const response = await Promise.race([
-//       fetch(baseURL + "/ai/back", {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify({
-//           model: "gemma2:2b",
-//           prompt: newMessage.value,
-//         }),
-//       }),
-//       timeoutPromise, // 如果 fetch 未完成，此 promise 将优先返回超时错误
-//     ]);
-//
-//     if (!response.body) {
-//       throw new Error("流式返回没有body");
-//     }
-//
-//     const reader = response.body.getReader();
-//     const decoder = new TextDecoder("utf-8");
-//     let done = false;
-//     let incompleteChunk = ""; // 用于存储未完整解析的数据块
-//
-//     messages.value[messages.value.length - 1].loading = false; // 解除加载
-//
-//     while (!done) {
-//       const {value, done: readerDone} = await reader.read();
-//       done = readerDone;
-//
-//       if (value) {
-//         const chunk = decoder.decode(value, {stream: true});
-//         incompleteChunk += chunk;
-//
-//         try {
-//           console.log(incompleteChunk,typeof incompleteChunk);
-//           const parsedChunk = JSON.parse(incompleteChunk);
-//           console.log(incompleteChunk,typeof incompleteChunk);
-//           messages.value[messages.value.length - 1].text += parsedChunk.response;
-//           scrollToBottom();
-//           incompleteChunk = "";
-//         } catch (parseError) {
-//           console.error("JSON解析失败: ", parseError);
-//           ErrorPop("Model returns error");
-//           deleteMessage(messages.value.length-1);
-//           return;
-//         }
-//       }
-//     }
-//     scrollToBottom();
-//     console.log("流结束");
-//   } catch (error) {
-//     console.error("错误: ", error);
-//     // messages.value[messages.value.length - 1].loading = false;
-//     messages.value.pop()//直接删去最后一个
-//     if (error.message === "请求超时") {
-//       ErrorPop("Timeout");
-//     } else {
-//       ErrorPop("404 Warning");
-//     }
-//   }
-// };
 
 const getAnswer = async () => {
   const timeout = 10000; // 设置超时时间（以毫秒为单位，例如10秒）
@@ -263,9 +191,8 @@ const getAnswer = async () => {
       if (value) {
         // 解码数据块并按行分割
         const chunk = decoder.decode(value, { stream: true });
-        console.log("chunk",chunk);
+        // console.log("chunk",chunk);
         const lines = chunk.split("\n");
-        console.log("lines",lines);
 
         // 逐行解析并处理
         lines.forEach((line) => {
@@ -415,11 +342,13 @@ const props = defineProps({
 });
 
 // 监听 props 的变化
-watch(() => props.receivedInput, (newValue) => {
-  if (newValue) {
-    handleReceivedInput(newValue);
+watch(() => props.receivedInput[0], (newValue) => {
+  if (newValue !== undefined) {
+    const firstValue = props.receivedInput[1]; // 获取第2个值
+    handleReceivedInput(firstValue); // 对第2个值进行操作
   }
 });
+
 
 // 处理收到的数据
 const handleReceivedInput = (inputValue) => {

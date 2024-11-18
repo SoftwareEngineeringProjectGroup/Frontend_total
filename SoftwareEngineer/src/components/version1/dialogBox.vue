@@ -11,7 +11,7 @@
     </div>
     <input @keydown="handleKeyDown" class="message-input" v-model="inputValue" placeholder="Please enter here"
            style="height: auto;">
-    <el-button type="success" :icon="Promotion" @click="sendToMain" size="large" circle/>
+    <el-button type="success" :icon="Promotion" @click="sendToMain" size="large" style="font-size: 20px;" circle/>
     <!-- 点击按钮控制语音识别的开始和停止 -->
     <el-button
         :type="isRecording ? 'warning' : 'primary'"
@@ -19,6 +19,7 @@
         @click="toggleVoiceRecognition"
         size="large"
         :loading="isLoading"
+        style="font-size: 20px;"
         circle
     ></el-button>
 <!--    选择语音类型-->
@@ -60,9 +61,11 @@ const emit = defineEmits(['send-to-main']);
 let inputValue = ref('');
 
 // 发送输入内容给父组件
+let ask_tip=0;
 const sendToMain = () => {
   // console.log(`发送${inputValue.value}到main`);
-  emit('send-to-main', inputValue.value);
+  emit('send-to-main', [ask_tip, inputValue.value]);
+  ask_tip+=1;
   inputValue.value = '';
 };
 
