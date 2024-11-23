@@ -23,7 +23,7 @@ const routes = [
 
 const router = createRouter({
     history: createWebHashHistory(), // 改为 Hash 模式
-    routes,
+     routes,
 });
 
 export default router;

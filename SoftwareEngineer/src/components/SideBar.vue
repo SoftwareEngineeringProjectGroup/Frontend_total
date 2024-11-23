@@ -7,7 +7,6 @@
       class="el-menu-vertical-demo"
       :collapse="isCollapse"
       router
-
   >
     <!-- 首页 -->
     <el-menu-item index="/">

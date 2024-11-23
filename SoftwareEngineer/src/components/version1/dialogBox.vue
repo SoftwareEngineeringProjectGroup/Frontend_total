@@ -83,8 +83,6 @@ onBeforeMount(() => {
     ErrorPop("Please set an IPv4 address",5000)
   }
   baseURL=stateStore.baseUrl;
-
-
 });
 
 
