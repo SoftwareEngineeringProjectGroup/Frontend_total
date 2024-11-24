@@ -1,6 +1,6 @@
 <template>
   <div class="dietitian">
-    <aside class="sidebar" >
+    <aside class="sidebar">
       <SideBar />
     </aside>
 
@@ -15,11 +15,15 @@
         <div class="input-container">
           <input
               type="text"
-              placeholder="请输入您的需求"
+              placeholder="Enter your request"
               class="input-box"
               v-model="userInput"
               @keyup.enter="handleInput"
           />
+        </div>
+
+        <div class="response-container" v-if="aiResponse">
+          <p>AI Reply: {{ aiResponse }}</p>
         </div>
 
         <div class="button-container">
@@ -30,9 +34,20 @@
       </div>
 
       <div v-else>
-        <button @click="goBack">返回主界面</button>
+        <button @click="goBack">Return to Main Page</button>
 
+        <!-- 食谱页面 -->
         <div v-if="currentView === 'recipe'" class="recipe-background">
+          <div class="input-container">
+            <input
+                type="text"
+                placeholder="Generate new meals..."
+                class="input-box"
+                v-model="recipeInput"
+                @keyup.enter="handleInput"
+            />
+          </div>
+
           <table class="recipe-table">
             <thead>
             <tr>
@@ -45,27 +60,31 @@
             <tbody>
             <tr v-for="(meals, day) in recipes" :key="day">
               <td class="interactive-cell">{{ day }}</td>
-              <td class="interactive-cell">{{ meals.breakfast }}</td>
-              <td class="interactive-cell">{{ meals.lunch }}</td>
-              <td class="interactive-cell">{{ meals.dinner }}</td>
+              <td class="interactive-cell">{{ meals.breakfast || 'Loading...' }}</td>
+              <td class="interactive-cell">{{ meals.lunch || 'Loading...' }}</td>
+              <td class="interactive-cell">{{ meals.dinner || 'Loading...' }}</td>
             </tr>
             </tbody>
           </table>
+
+          <p>{{ aiResponse }}</p>
         </div>
 
+        <!-- 可视化页面 -->
         <div v-if="currentView === 'visualization'" class="visualization-background">
-          <p>可视化界面内容：</p>
+          <p>Visualization Content:</p>
           <div class="features">
-            <button @click="() => showChart('pie')">查看饼图</button>
-            <button @click="() => showChart('line')">查看折线图</button>
+            <button @click="showChart('pie')">View Pie Chart</button>
+            <button @click="showChart('line')">View Line Chart</button>
           </div>
           <div v-if="chartType" class="chart">
-            <chart-component :type="chartType" />
+            <ChartComponent :type="chartType" />
           </div>
         </div>
 
+        <!-- 图片识别页面 -->
         <div v-if="currentView === 'photo-recognition'" class="photo-recognition-background">
-          <p>拍照识别界面内容...</p>
+          <p>Photo Recognition Content...</p>
         </div>
       </div>
     </main>
@@ -73,101 +92,165 @@
 </template>
 
 <script setup>
-import {ref, computed, onBeforeMount, watch} from 'vue';
+import { ref, onBeforeMount, watch } from 'vue';
 import { useStateStore } from '@/stores/stateStore';
-import SideBar from "@/components/SideBar.vue";
-import ChartComponent from "@/components/dietitian_page/ChartComponent.vue";
 
 const currentView = ref('main');
 const chartType = ref(null);
 const store = useStateStore();
 const userInput = ref('');
-const recipes = ref({}); // 存储食谱数据
+const recipeInput = ref('');
+const aiResponse = ref('');
+const recipes = ref({});
 
+// 随机生成食谱数据
+const generateRandomRecipe = (customPrompt) => {
+  const sampleMeals = [
+    "Pancakes", "Omelette", "Smoothie", "Grilled Chicken", "Salad",
+    "Soup", "Pasta", "Steamed Fish", "Sushi", "BBQ Ribs"
+  ];
 
-// 假设从后端获取的食谱数据
-const fetchRecipes = () => {
-  recipes.value = {
-    Monday: { breakfast: "Oatmeal", lunch: "Salad", dinner: "Grilled Chicken" },
-    Tuesday: { breakfast: "Pancakes", lunch: "Sushi", dinner: "Pasta" },
-    Wednesday: { breakfast: "Smoothie", lunch: "Tacos", dinner: "Steak" },
-    Thursday: { breakfast: "Eggs", lunch: "Sandwich", dinner: "Fish" },
-    Friday: { breakfast: "Yogurt", lunch: "Burger", dinner: "Pizza" },
-    Saturday: { breakfast: "French Toast", lunch: "Quesadilla", dinner: "Curry" },
-    Sunday: { breakfast: "Bagel", lunch: "Noodles", dinner: "Stir Fry" }
-  };
+  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const newRecipes = {};
+
+  days.forEach(day => {
+    newRecipes[day] = {
+      breakfast: sampleMeals[Math.floor(Math.random() * sampleMeals.length)],
+      lunch: sampleMeals[Math.floor(Math.random() * sampleMeals.length)],
+      dinner: sampleMeals[Math.floor(Math.random() * sampleMeals.length)],
+    };
+  });
+
+  recipes.value = newRecipes;
+
+  if (customPrompt) {
+    aiResponse.value = `New meals generated based on input: "${customPrompt}"`;
+  }
 };
 
-fetchRecipes(); // 初始化时获取食谱数据
+// 设置请求超时时间
+const TIMEOUT = 5000;
 
-const handleInput = () => {
-  // 处理输入内容（例如显示食谱等）
-  console.log(userInput.value);
-  userInput.value = ''; // 清空输入框
+// 创建超时 Promise
+const createTimeoutPromise = (timeout) => {
+  return new Promise((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('Request timed out'));
+    }, timeout);
+  });
+};
+
+// 向后端发送请求以获取动态食谱
+const fetchDynamicRecipe = async (input) => {
+  try {
+    const baseURL = 'http://127.0.0.1:8000';
+    const timeoutPromise = createTimeoutPromise(TIMEOUT);
+
+    const response = await Promise.race([
+      fetch(`${baseURL}/ai/back`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: "gemma2:2b",
+          prompt: input
+        })
+      }),
+      timeoutPromise
+    ]);
+
+    if (response.ok) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+
+      let recipesData = {};
+      let processingMessage = '';
+
+      const processStream = async () => {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n').filter(line => line.trim());
+
+          for (const line of lines) {
+            try {
+              const jsonLine = JSON.parse(line);
+              if (jsonLine.status === 'processing') {
+                processingMessage = jsonLine.message;
+              } else if (jsonLine.status === 'streaming') {
+                const recipeContent = jsonLine.recipe;
+                // 使用正则表达式提取关键信息
+                const regex = /{"day":"(.*?)","meal":"(.*?)","food":"(.*?)"/;
+                const match = recipeContent.match(regex);
+                if (match) {
+                  const [_, day, meal, food] = match;
+                  if (!recipesData[day]) {
+                    recipesData[day] = {};
+                  }
+                  recipesData[day][meal] = food;
+                }
+              } else if (jsonLine.status === 'done') {
+                recipes.value = recipesData;
+                aiResponse.value = processingMessage;
+                return;
+              }
+            } catch (error) {
+              console.error('Error parsing stream data:', error);
+            }
+          }
+        }
+      };
+
+      await processStream();
+    } else {
+      throw new Error('Failed to fetch dynamic recipe');
+    }
+  } catch (error) {
+    console.error('Error fetching dynamic recipe:', error);
+    generateRandomRecipe(input); // 使用默认的随机生成食谱数据
+  }
+};
+
+const handleInput = async () => {
+  if (!recipeInput.value.trim()) return;
+  await fetchDynamicRecipe(recipeInput.value);
+  recipeInput.value = ''; // 清空输入框
 };
 
 const showRecipe = () => {
-  currentView.value = 'recipe';
+  currentView.value = "recipe";
+  generateRandomRecipe(); // 默认初始化食谱
 };
 
-const showVisualization = () => {
-  currentView.value = 'visualization';
-};
-
-const showPhotoRecognition = () => {
-  currentView.value = 'photo-recognition';
-};
-
-const showChart = (type) => {
-  chartType.value = type;
-};
-
+const showVisualization = () => (currentView.value = 'visualization');
+const showPhotoRecognition = () => (currentView.value = 'photo-recognition');
 const goBack = () => {
   currentView.value = 'main';
   chartType.value = null;
 };
 
-//以下是伸缩框变化的方法
+const showChart = (type) => (chartType.value = type);
 
-//记录margin
-let marginLeftValue = ref(100);
-
-//挂载时更新margin
+const marginLeftValue = ref(100);
 onBeforeMount(() => {
-  store.isOpenValue ? marginLeftValue.value = 200 : marginLeftValue.value = 69;
-
-});
-const decreaseMargin = () => {
-  let interval = setInterval(() => {
-    if (marginLeftValue.value > 63) { // 最小的 margin-left 值
-      marginLeftValue.value -= 10;
-    } else {
-      clearInterval(interval);
-    }
-  }, 20); // 每 30 毫秒调整10
-};
-
-// 渐渐增加 margin-left 的方法
-const increaseMargin = () => {
-  let interval = setInterval(() => {
-    if (marginLeftValue.value < 200) { // 最大的 margin-left 值
-      marginLeftValue.value += 20;
-    } else {
-      clearInterval(interval);
-    }
-  }, 20); // 每 30 毫秒调整10
-};
-
-//检测变化
-watch(() => store.isOpenValue, (newValue) => {
-  if (newValue === 0) {
-    decreaseMargin();
-  } else if (newValue === 1) {
-    increaseMargin();
-  }
+  store.isOpenValue ? (marginLeftValue.value = 200) : (marginLeftValue.value = 69);
 });
 
+watch(
+    () => store.isOpenValue,
+    (newValue) => {
+      if (newValue === 0) {
+        marginLeftValue.value = 69;
+      } else if (newValue === 1) {
+        marginLeftValue.value = 200;
+      }
+    }
+);
 </script>
+
 
 <style scoped>
 .dietitian {
@@ -175,8 +258,8 @@ watch(() => store.isOpenValue, (newValue) => {
   font-family: Arial, sans-serif;
   height: 100vh;
   background: linear-gradient(135deg, #8fefdd, #5eb3ff, #b78cff, #ff9de2);
-  background-size: 400% 400%; /* 放大背景尺寸 */
-  animation: gradient-flow 7s ease infinite; /* 默认不流动 */
+  background-size: 400% 400%; /* Enlarge background size */
+  animation: gradient-flow 7s ease infinite; /* Default no flow */
 }
 
 @keyframes gradient-flow {
@@ -223,12 +306,11 @@ watch(() => store.isOpenValue, (newValue) => {
   justify-content: center;
   background-color: white;
   padding: 20px;
-  width: 400px;
+  width: 800px;
   margin: auto;
-  border-radius: 10px; /* 圆角设置 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 可选，增加阴影效果 */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional, add shadow effect */
 }
-
 
 .whale-container {
   display: flex;
@@ -237,16 +319,12 @@ watch(() => store.isOpenValue, (newValue) => {
 }
 
 .whale-image {
-  width: 300px;
+  width: 350px;
   height: auto;
   transition: transform 0.3s ease;
   cursor: text;
 }
 
-.whale-image:hover {
-  transform: scale(1.2);
-  cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><text y="20" font-size="20">🥕</text></svg>') 1 10, auto;
-}
 
 .input-container {
   display: flex;
@@ -255,7 +333,7 @@ watch(() => store.isOpenValue, (newValue) => {
 }
 
 .input-box {
-  width: 600px;
+  width: 400px;
   height: 50px;
   padding: 10px;
   border: 2px solid #ccc;
@@ -265,7 +343,7 @@ watch(() => store.isOpenValue, (newValue) => {
 }
 
 .input-box:focus {
-  border-color: #4caf50;
+  border-color: #4f5bd5;
   outline: none;
 }
 
@@ -288,7 +366,7 @@ watch(() => store.isOpenValue, (newValue) => {
 
 button {
   padding: 10px 20px;
-  background-color: #4caf50;
+  background-color: #4f5bd5;
   color: white;
   border: none;
   border-radius: 5px;
@@ -297,13 +375,13 @@ button {
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: #646cff;
 }
 
-/* 食谱部分样式 */
+/* Recipe section styles */
 .recipe-background {
   background-color: #FFC0CB;
-  width: 1000px;
+  width: 1200px;
   height: 400px;
   display: flex;
   align-items: center;
@@ -314,7 +392,7 @@ button:hover {
 
 .recipe-table {
   border-collapse: collapse;
-  width: 100%;
+  width: 95%;
   text-align: center;
 }
 
@@ -363,7 +441,7 @@ button:hover {
 .features button {
   margin: 10px;
   padding: 10px 20px;
-  background-color: #4caf50;
+  background-color: #4f5bd5;
   color: white;
   border: none;
   border-radius: 5px;
@@ -371,7 +449,7 @@ button:hover {
 }
 
 .features button:hover {
-  background-color: #45a049;
+  background-color: #646cff;
 }
 
 .chart {

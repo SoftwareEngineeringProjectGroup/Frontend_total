@@ -10,6 +10,7 @@ from fish_audio_sdk import Session, TTSRequest, ASRRequest
 from io import BytesIO
 from .test2 import proxy_generate_request
 from .voices import generate_audio, speechToText
+from .model import generate_dynamic_recipe
 
 
 # Create your views here.
@@ -187,3 +188,24 @@ if __name__ == "__main__":
         response = HttpResponse(file.read(), content_type="application/octet-stream")
         response["Content-Disposition"] = f"attachment; filename={os.path.basename(file_path)}"
         return response
+
+def generate_dynamic_recipe_view(request):
+    if request.method == "POST":
+        # 获取前端发送的 JSON 数据
+        try:
+            data_post = json.loads(request.body)
+            prompt = data_post.get("prompt", "")
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+        # 调用生成动态食谱数据函数
+        response = generate_dynamic_recipe(prompt)
+
+        # 将返回的流式内容逐步发送给前端
+        def stream_response():
+            for chunk in response:
+                time.sleep(0.5)  # 模拟响应延迟
+                yield chunk  # 直接返回生成器的内容
+
+        return StreamingHttpResponse(stream_response(), content_type="application/json")
+    return JsonResponse({"error": "只能POST请求"}, status=405)
