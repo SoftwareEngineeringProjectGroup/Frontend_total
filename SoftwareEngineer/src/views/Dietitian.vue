@@ -1,13 +1,13 @@
 <template>
   <div class="dietitian">
     <aside class="sidebar">
-      <SideBar />
+      <SideBar/>
     </aside>
 
     <main class="content" :style="{ marginLeft: marginLeftValue + 'px' }">
       <div v-if="currentView === 'main'" class="dialogue-box">
         <div class="whale-container">
-          <img src="@/assets/whale.png" alt="Whale" class="whale-image" />
+          <img src="@/assets/whale.png" alt="Whale" class="whale-image"/>
         </div>
 
         <h2>Your Personal Health Aide</h2>
@@ -78,7 +78,7 @@
             <button @click="showChart('line')">View Line Chart</button>
           </div>
           <div v-if="chartType" class="chart">
-            <ChartComponent :type="chartType" />
+            <ChartComponent :type="chartType"/>
           </div>
         </div>
 
@@ -92,8 +92,9 @@
 </template>
 
 <script setup>
-import { ref, onBeforeMount, watch } from 'vue';
-import { useStateStore } from '@/stores/stateStore';
+import {ref, onBeforeMount, watch} from 'vue';
+import {useStateStore} from '@/stores/stateStore';
+import {ElMessage} from "element-plus";
 
 const currentView = ref('main');
 const chartType = ref(null);
@@ -102,6 +103,14 @@ const userInput = ref('');
 const recipeInput = ref('');
 const aiResponse = ref('');
 const recipes = ref({});
+let recipeData = ref("") //每次接收到的数据
+let baseURL = "" //共有url
+
+
+onBeforeMount(() => {
+  baseURL = store.baseUrl; //先设置成默认url
+});
+
 
 // 随机生成食谱数据
 const generateRandomRecipe = (customPrompt) => {
@@ -128,93 +137,98 @@ const generateRandomRecipe = (customPrompt) => {
   }
 };
 
-// 设置请求超时时间
-const TIMEOUT = 5000;
-
-// 创建超时 Promise
-const createTimeoutPromise = (timeout) => {
-  return new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('Request timed out'));
-    }, timeout);
-  });
-};
+// // 设置请求超时时间
+// const TIMEOUT = 5000;
+//
+// // 创建超时 Promise
+// const createTimeoutPromise = (timeout) => {
+//   return new Promise((_, reject) => {
+//     setTimeout(() => {
+//       reject(new Error('Request timed out'));
+//     }, timeout);
+//   });
+// };
 
 // 向后端发送请求以获取动态食谱
-const fetchDynamicRecipe = async (input) => {
-  try {
-    const baseURL = 'http://10.252.130.135:8000';
-    const timeoutPromise = createTimeoutPromise(TIMEOUT);
 
+
+const fetchDynamicRecipe = async (input) => {
+  const timeout = 10000; // 设置超时时间（以毫秒为单位，例如10秒）
+
+  const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("请求超时")), timeout)
+  );
+
+  try {
     const response = await Promise.race([
-      fetch(`${baseURL}/ai/back`, {
-        method: 'POST',
+      fetch(baseURL + "/ai/back", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           model: "gemma2:2b",
-          prompt: input
-        })
+          prompt: input,
+        }),
       }),
-      timeoutPromise
+      timeoutPromise, // 如果 fetch 未完成，此 promise 将优先返回超时错误
     ]);
 
-    if (response.ok) {
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf-8');
-
-      let recipesData = {};
-      let processingMessage = '';
-
-      const processStream = async () => {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n').filter(line => line.trim());
-          console.log(lines);
+    if (!response.body) {
+      throw new Error("流式返回没有body");
+    }
 
 
-          for (const line of lines) {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+    let done = false;
+    recipeData.value = "";//每次接收前先清空
+
+    while (!done) {
+      const {value, done: readerDone} = await reader.read();
+      done = readerDone;
+
+      if (value) {
+        // 解码数据块并按行分割
+        const chunk = decoder.decode(value, {stream: true});
+        const lines = chunk.split("\n");
+
+        // 逐行解析并处理
+        lines.forEach((line) => {
+          if (line.trim()) { // 忽略空行
             try {
-              const jsonLine = JSON.parse(line);
-              if (jsonLine.status === 'processing') {
-                processingMessage = jsonLine.message;
-              } else if (jsonLine.status === 'streaming') {
-                const recipeContent = jsonLine.recipe;
-                // 使用正则表达式提取关键信息
-                const regex = /{"day":"(.*?)","meal":"(.*?)","food":"(.*?)"/;
-                const match = recipeContent.match(regex);
-                if (match) {
-                  const [_, day, meal, food] = match;
-                  if (!recipesData[day]) {
-                    recipesData[day] = {};
-                  }
-                  recipesData[day][meal] = food;
-                }
-              } else if (jsonLine.status === 'done') {
-                recipes.value = recipesData;
-                aiResponse.value = processingMessage;
-                return;
-              }
-            } catch (error) {
-              console.error('Error parsing stream data:', error);
+              const parsedChunk = JSON.parse(line);
+              recipeData.value += parsedChunk.response; //获得的返回添加进食谱data
+              if (parsedChunk.response !== " ") console.log("正在接收食谱中,这次接收到：", parsedChunk.response);
+
+            } catch (parseError) {
+              console.warn("JSON解析失败，跳过该行: ", line);
             }
           }
-        }
-      };
-
-      await processStream();
-    } else {
-      throw new Error('Failed to fetch dynamic recipe');
+        });
+      }
     }
+
+    console.log("接收完成");
+    console.log("最终接收结果（recipeData）：", recipeData.value)
   } catch (error) {
     console.error('Error fetching dynamic recipe:', error);
-    generateRandomRecipe(input); // 使用默认的随机生成食谱数据
+    generateRandomRecipe(input);
+    if (error.message === "请求超时") {
+      ErrorPop("Timeout");
+    } else {
+      ErrorPop("404 Warning");
+    }
   }
 };
+const ErrorPop = (info, time = 3000) => {
+  ElMessage({
+    showClose: true,
+    message: info,
+    type: 'error',
+    duration: time
+  })
+}
 
 const handleInput = async () => {
   if (!recipeInput.value.trim()) return;
