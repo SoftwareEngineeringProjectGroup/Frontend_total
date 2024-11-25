@@ -6,37 +6,37 @@
 import * as echarts from "echarts";
 
 export default {
-  props: ["type"],  // 接受一个名为 "type" 的属性来决定图表类型
+  props: ["type"], // Accepts a prop named "type" to determine the chart type
   mounted() {
-    this.initChart();  // 组件挂载时初始化图表
+    this.initChart(); // Initialize the chart when the component is mounted
   },
   watch: {
     type() {
-      this.initChart();  // 监听 "type" 属性变化，更新图表
+      this.initChart(); // Watch for changes in the "type" prop and update the chart
     },
   },
   methods: {
     initChart() {
-      const chart = echarts.init(this.$refs.chart);  // 使用ECharts初始化图表
-      const option = this.type === "pie" ? this.getPieOption() : this.getLineOption();  // 根据传入的类型选择图表配置
-      chart.setOption(option);  // 设置图表配置
+      const chart = echarts.init(this.$refs.chart); // Initialize the chart with ECharts
+      const option = this.type === "pie" ? this.getPieOption() : this.getLineOption(); // Select the chart configuration based on the type
+      chart.setOption(option); // Set the chart configuration
     },
     getPieOption() {
       return {
-        title: { text: "营养分布", left: "center" },
+        title: { text: "Nutritional Distribution", left: "center" },
         tooltip: { trigger: "item" },
         legend: { bottom: "0%", left: "center" },
         series: [
           {
-            name: "食物成分",
+            name: "Food Components",
             type: "pie",
             radius: "50%",
             data: [
-              { value: 335, name: "蛋白质" },
-              { value: 310, name: "脂肪" },
-              { value: 234, name: "碳水化合物" },
-              { value: 135, name: "纤维" },
-              { value: 1548, name: "其他" },
+              {value: 335, name: "Protein"},
+              {value: 310, name: "Fat"},
+              {value: 234, name: "Carbohydrates"},
+              {value: 135, name: "Fiber"},
+              {value: 1548, name: "Others"},
             ],
             emphasis: {
               itemStyle: {
@@ -51,13 +51,13 @@ export default {
     },
     getLineOption() {
       return {
-        title: { text: "每日热量消耗", left: "center" },
-        tooltip: { trigger: "axis" },
+        title: {text: "Daily Calorie Consumption", left: "center"},
+        tooltip: {trigger: "axis"},
         xAxis: {
           type: "category",
-          data: ["周一", "周二", "周三", "周四", "周五", "周六", "周日"],
+          data: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
         },
-        yAxis: { type: "value" },
+        yAxis: {type: "value"},
         series: [
           {
             data: [820, 932, 901, 934, 1290, 1330, 1320],
@@ -72,5 +72,5 @@ export default {
 </script>
 
 <style scoped>
-/* 图表组件的样式，确保图表充满父容器 */
+/* Styles for the chart component to ensure it fills the parent container */
 </style>

@@ -25,7 +25,7 @@
                 <el-icon class="header-icon">
                   <ChatRound/>
                 </el-icon>
-                Chat Module
+                &nbsp;Chat Module
               </template>
 
               <div>
@@ -42,7 +42,7 @@
                 <el-icon class="header-icon">
                   <SwitchFilled/>
                 </el-icon>
-                Information Retrieval Module
+                &nbsp;Information Retrieval Module
               </template>
 
               <div>
@@ -57,7 +57,7 @@
                 <el-icon class="header-icon">
                   <Monitor/>
                 </el-icon>
-                Programming Assistant Module
+                &nbsp;Programming Assistant Module
               </template>
               <div>
                 Easy to identify: the interface should be straightforward, which helps
@@ -71,7 +71,7 @@
                 <el-icon class="header-icon">
                   <DishDot/>
                 </el-icon>
-                Nutritionist Module
+                &nbsp;Nutritionist Module
               </template>
               <div>
                 Decision making: giving advices about operations is acceptable, but do
@@ -86,7 +86,7 @@
                 <el-icon class="header-icon">
                   <ChatDotSquare/>
                 </el-icon>
-                Feedback
+                &nbsp;Feedback
               </template>
               <div>
                 Decision making: giving advices about operations is acceptable, but do
@@ -100,7 +100,7 @@
                 <el-icon class="header-icon">
                   <Setting/>
                 </el-icon>
-                Setting
+                &nbsp;Setting
               </template>
               <div>
                 Decision making: giving advices about operations is acceptable, but do

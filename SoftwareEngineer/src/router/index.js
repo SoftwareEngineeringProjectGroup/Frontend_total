@@ -11,19 +11,27 @@ import Floating from "@/views/Floating.vue";
 import Intro from "@/views/Intro.vue";
 
 const routes = [
-    { path: '/', name: 'Home', component: Home },
-    { path: '/chat', name: 'Chat', component: Chat },
-    { path: '/information', name: 'Information', component: Information },
-    { path: '/programming', name: 'Programming', component: Programming },
-    { path: '/dietitian', name: 'DietitianIntro', component: Intro }, // 使用Intro作为/dietitian路径的内容
-    { path: '/dietitian/main', name: 'DietitianMain', component: Dietitian }, // 使用Dietitian.vue作为主要内容
-    { path: '/setting', name: 'Setting', component: Setting },
-    { path: '/floating', name: 'Floating', component: Floating },
+    { path: '/', name: 'Home', component: Home, meta: { title: 'Lambda' } },
+    { path: '/chat', name: 'Chat', component: Chat, meta: { title: 'Chat' } },
+    { path: '/information', name: 'Information', component: Information, meta: { title: 'Info' } },
+    { path: '/programming', name: 'Programming', component: Programming, meta: { title: 'Programming Assistant' } },
+    { path: '/dietitian', name: 'DietitianIntro', component: Intro, meta: { title: 'Dietitian Intro' } },
+    { path: '/dietitian/main', name: 'DietitianMain', component: Dietitian, meta: { title: 'Nutritionist' } },
+    { path: '/setting', name: 'Setting', component: Setting, meta: { title: 'Settings' } },
+    { path: '/floating', name: 'Floating', component: Floating, meta: { title: 'Floating Window' } },
 ];
 
 const router = createRouter({
-    history: createWebHashHistory(), // 改为 Hash 模式
+    history: createWebHashHistory(), // Using Hash mode
     routes,
+});
+
+// 动态设置页面标题
+router.beforeEach((to, from, next) => {
+    if (to.meta.title) {
+        document.title = to.meta.title; // 设置页面标题
+    }
+    next();
 });
 
 export default router;

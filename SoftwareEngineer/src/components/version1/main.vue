@@ -449,7 +449,7 @@ const deleteMessage = (index) => {
 }
 
 .user-message .message-content {
-  background-color: #d1e7dd;
+  background-color: #8fefdd;
 }
 
 .ai-message .message-content {

@@ -9,6 +9,7 @@
     </div>
 
     <!--    过往信息显示-->
+
     <div class="past-info">
       <el-button
           v-for="(ask, index) in asks"
@@ -41,7 +42,7 @@
                  @click="triggerFileInput" circle/>
 
       <!--      悬浮窗按钮-->
-      <el-button type="info" size="large" class="dropdown-button" :icon="More" style="font-size: 20px;" circle/>
+      <el-button type="info" size="large" class="dropdown-button" :icon="More" style="font-size: 20px;" @click="openFloating" circle/>
 
       <!-- 隐藏的文件输入框 -->
       <input ref="fileInput" type="file" @change="onFileChange" style="display: none"/>
@@ -234,8 +235,10 @@ const getAnswer = async () => {
     await revertBall();
     if (error.message === "请求超时") {
       ErrorPop("Timeout");
+      stopScaling();
     } else {
       ErrorPop("404 Warning");
+      stopScaling();
     }
   }
 };
@@ -581,6 +584,13 @@ const handleKeyDown = (event: KeyboardEvent) => {
     sendToModel();
   }
 };
+
+//悬浮窗激活
+function openFloating() {
+
+  window.electronAPI.openFloatingWindow();
+  console.log("已按下");
+}
 
 </script>
 <style scoped>

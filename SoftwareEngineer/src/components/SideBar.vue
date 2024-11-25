@@ -59,13 +59,13 @@
           <el-icon>
             <DishDot/>
           </el-icon>
-          <template #title>Dietitian</template>
+          <template #title>Nutritionist</template>
         </el-menu-item>
       </el-menu-item-group>
     </el-sub-menu>
 
     <!-- 用户评论，目前禁用 -->
-    <el-menu-item index="3" disabled>
+    <el-menu-item index="3">
       <el-icon>
         <chat-dot-square/>
       </el-icon>

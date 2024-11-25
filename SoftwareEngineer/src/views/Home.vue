@@ -100,8 +100,9 @@
 <!--}-->
 <!--</style>-->
 <template>
-  <SideBar/>
+ <Gather/>
 </template>
 <script setup>
 import SideBar from "@/components/SideBar.vue";
+import Gather from "@/components/home_page/gather.vue";
 </script>
