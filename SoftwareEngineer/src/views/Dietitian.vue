@@ -143,7 +143,7 @@ const createTimeoutPromise = (timeout) => {
 // 向后端发送请求以获取动态食谱
 const fetchDynamicRecipe = async (input) => {
   try {
-    const baseURL = 'http://127.0.0.1:8000';
+    const baseURL = 'http://10.252.130.135:8000';
     const timeoutPromise = createTimeoutPromise(TIMEOUT);
 
     const response = await Promise.race([
@@ -174,6 +174,8 @@ const fetchDynamicRecipe = async (input) => {
 
           const chunk = decoder.decode(value, { stream: true });
           const lines = chunk.split('\n').filter(line => line.trim());
+          console.log(lines);
+
 
           for (const line of lines) {
             try {

@@ -1,9 +1,19 @@
 import requests
 import json
 
+def construct_prompt(user_input):
+    """
+    根据用户输入动态生成 Prompt。
+    如果用户输入为空，使用默认的 Prompt。
+    """
+    default_prompt = "Generate a one-week meal plan with breakfast, lunch, and dinner for each day."
+    if user_input.strip():
+        return f"Based on the user's input, create a one-week meal plan. Input: \"{user_input}\"."
+    return default_prompt
+
 def generate_dynamic_recipe(prompt):
-    # 翻译 Prompt（如果需要）
-    # prompt = translator.translate(prompt)  # 如果有翻译需求，解开此注释
+    # 构建动态 Prompt（根据需要翻译或调整）
+    prompt = construct_prompt(prompt)
 
     # API 请求设置
     url = "https://spark-api-open.xf-yun.com/v1/chat/completions"

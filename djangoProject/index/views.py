@@ -194,12 +194,12 @@ def generate_dynamic_recipe_view(request):
         # 获取前端发送的 JSON 数据
         try:
             data_post = json.loads(request.body)
-            prompt = data_post.get("prompt", "")
+            user_input = data_post.get("prompt", "")
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON"}, status=400)
 
         # 调用生成动态食谱数据函数
-        response = generate_dynamic_recipe(prompt)
+        response = generate_dynamic_recipe(user_input)
 
         # 将返回的流式内容逐步发送给前端
         def stream_response():

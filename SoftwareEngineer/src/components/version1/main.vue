@@ -263,9 +263,9 @@ const getAnswer = async () => {
       if (value) {
         // 解码数据块并按行分割
         const chunk = decoder.decode(value, { stream: true });
-        console.log("chunk",chunk);
+        // console.log("chunk",chunk);
         const lines = chunk.split("\n");
-        console.log("lines",lines);
+        // console.log("lines",lines);
 
         // 逐行解析并处理
         lines.forEach((line) => {
@@ -283,6 +283,7 @@ const getAnswer = async () => {
     }
 
     scrollToBottom();
+    console.log(messages.value[messages.value.length - 1].text);
     console.log("流结束");
   } catch (error) {
     console.error("错误: ", error);
