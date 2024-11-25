@@ -85,7 +85,7 @@ const increaseMargin = () => {
 /* 只在 .back_color 上应用动画 */
 .content-container {
   height: 100vh;
-  background: linear-gradient(90deg, #c0ffc0, #ffffb9, #ffb0b0, #c2c6ff, #ffb0b0);
+  background: linear-gradient(90deg, #c0ffc0, #ffffb9, #ffb0b0, #ffb0b0, #c2c6ff);
   background-size: 400% 400%;
   animation: fade 3s, gradient-flow 7s 5s ease forwards;
 }

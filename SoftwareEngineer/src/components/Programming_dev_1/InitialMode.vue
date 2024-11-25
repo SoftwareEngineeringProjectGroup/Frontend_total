@@ -1,25 +1,63 @@
 <template>
-  <div class="container">
-    <div class="content">
+  <div class="container"
+       :style="{
+      width: isShrink !== 0 ? '800px' : '100%',
+      alignSelf: isShrink !== 0 ? 'flex-start' : 'center',
+    }"
+  >
+    <div
+        v-if="isShrink !== 0"
+        class="chatBox"
+        :style="{
+          overflowY: 'auto'
+        }"
+    >
+      <chatBox />
+    </div>
+    <div
+        class="content"
+        :style="{
+          transform: isShrink !== 0 ? 'translateY(-50px)' : 'translateY(-50px)',
+          bottom: isShrink !== 0 ? '50px' : 'auto',
+          position: isShrink !== 0 ? 'absolute' : 'static'
+        }"
+    >
       <!-- 条件渲染：显示闪烁动画或打字文字 -->
-      <h1 v-if="!isTypingStarted">
+      <h1 v-if="!isTypingStarted && isShrink === 0">
         <span class="dot">!</span>
       </h1>
-      <h1 v-else>{{ displayedText }}</h1>
-      <WholeInputBox />
+      <h1 v-if="isTypingStarted && isShrink === 0">{{ displayedText }}</h1>
+      <WholeInputBox @firstUpload="firstUploadShrinkSpace"/>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, defineEmits } from 'vue';
 import WholeInputBox from "@/components/Programming_dev_1/WholeInputBox.vue";
+import chatBox from "@/components/Programming_dev_1/chatBox.vue";
 
 const fullText = "What can I help with?"; // 完整标题内容
 const displayedText = ref(""); // 当前展示的文字
 const typingSpeed = 100; // 打字速度，单位：毫秒
 const initialDelay = 3000; // 延迟时间：3秒
 const isTypingStarted = ref(false); // 控制打字动画是否开始
+const emit = defineEmits(['codeBoxAppear'])
+
+let isShrink = ref(0);
+console.log(isShrink.value) //页面初始化时的值
+const firstUploadShrinkSpace = (message) => {
+  if(message != 0){
+    isShrink.value=1;
+    console.log("InitialMode want to shrink his size!");  //此时监听到了第一次的上传
+    sendToParent();
+  }
+}
+
+const sendToParent = () => {
+  console.log("sendToParent被触发")
+  emit('codeBoxAppear',ref(1));
+}
 
 // 打字效果逻辑
 const typeText = () => {

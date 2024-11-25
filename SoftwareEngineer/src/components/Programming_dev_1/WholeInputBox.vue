@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import {ref, nextTick, onBeforeMount} from 'vue';
+import {ref, nextTick, onBeforeMount, defineEmits} from 'vue';
 import axios from 'axios'; // 引入 Axios
 import InputBox from "@/components/Programming_dev_1/InputBox.vue";
 import { Upload, MessageBox } from "@element-plus/icons-vue";
@@ -25,6 +25,9 @@ import {useStateStore} from "@/stores/stateStore.ts";
 
 const inputValue = ref(''); // 存储输入框的值
 const containerHeight = ref(92); // 父容器初始高度
+
+let isFirstTime = 0;
+const emit = defineEmits(['firstUpload']);
 
 //设置baseURL
 const stateStore = useStateStore();
@@ -54,14 +57,30 @@ const uploadContent = async () => {
   }
 
   try {
-    // 替换为你的后端接口 URL
-    const response = await axios.post(baseURL, {
-      content: inputValue.value,
-    });
-    // 成功上传后的处理逻辑
-    console.log('上传成功:', response.data);
-    alert('内容已成功上传！');
-  } catch (error) {
+    console.log(inputValue.value.trim());
+    //1. 让整个initialmode组件宽度压缩到pagewithoutsidebar的左半边，在父组件中codeBox要出现在右半边
+    if (isFirstTime === 0){
+      console.log("WholeInputBox中的isFirstTime是0")
+      emit("firstUpload",ref(1));
+      isFirstTime = 1;
+    }
+    //2. 在initialmode中，文字描述要消失了，wholeinputbox的位置也要下移，右上方出现用户聊天框
+
+    //3. 调用ollamaapi，左上方出现ai聊天框
+
+    //最后输入框清零
+    inputValue.value = '';
+  }
+  // try {
+  //   // 替换为你的后端接口 URL
+  //   const response = await axios.post(baseURL, {
+  //     content: inputValue.value,
+  //   });
+  //   // 成功上传后的处理逻辑
+  //   console.log('上传成功:', response.data);
+  //   alert('内容已成功上传！');
+  // }
+  catch (error) {
     // 错误处理
     console.error('上传失败:', error);
     alert('上传失败，请稍后重试！');
@@ -77,7 +96,7 @@ const uploadContent = async () => {
   flex-direction: column;  /* 垂直排列 */
   background-color: #fafafa;
   border-radius: 8px;      /* 圆角 */
-  box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.5); /* 阴影效果 */
+  box-shadow:  2px 4px 6px rgba(0.1, 0, 0, 0.5); /* 阴影效果 */
   width: 600px;            /* 宽度固定 */
   padding: 10px;           /* 内边距 */
   box-sizing: border-box;  /* 包括 padding 在内的总宽度计算 */

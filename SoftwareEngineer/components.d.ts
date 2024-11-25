@@ -8,6 +8,8 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     ChartComponent: typeof import('./src/components/dietitian_page/ChartComponent.vue')['default']
+    ChatBox: typeof import('./src/components/Programming_dev_1/chatBox.vue')['default']
+    CodeBox: typeof import('./src/components/Programming_dev_1/codeBox.vue')['default']
     DialogBox: typeof import('./src/components/version1/dialogBox.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCollapse: typeof import('element-plus/es')['ElCollapse']
