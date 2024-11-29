@@ -47,7 +47,7 @@ function createMainWindow() {
     });
 
     // 如果需要，可以打开开发者工具
-    mainWindow.webContents.openDevTools({ mode: 'detach' });
+    // mainWindow.webContents.openDevTools({ mode: 'detach' });
 
     return mainWindow;
 }

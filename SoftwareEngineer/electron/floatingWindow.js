@@ -5,23 +5,24 @@ let floatingWindow;
 
 function createFloatingWindow() {
     floatingWindow = new BrowserWindow({
-        width: 200,
-        height: 200,
+        width: 400,
+        height: 1000,
         frame: false,
         alwaysOnTop: true,
-        transparent: true,
+        transparent:true,
+
         webPreferences: {
             contextIsolation: true,
-            nodeIntegration: false,
+            preload: path.join(__dirname, 'preload.js'), // 使用 preload.js
         },
     });
 
-    // 加载 Vue 打包后的 HTML 文件，并导航到悬浮窗口的特定路由
     floatingWindow.loadFile('./dist/index.html').then(() => {
         floatingWindow.webContents.executeJavaScript(`
             window.location.hash = '#/floating';
         `);
     });
+    // floatingWindow.webContents.openDevTools({ mode: 'detach' });
 
     return floatingWindow;
 }
