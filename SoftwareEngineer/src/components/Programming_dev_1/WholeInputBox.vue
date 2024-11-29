@@ -27,7 +27,7 @@ const inputValue = ref(''); // 存储输入框的值
 const containerHeight = ref(92); // 父容器初始高度
 
 let isFirstTime = 0;
-const emit = defineEmits(['firstUpload']);
+const emit = defineEmits(['firstUpload', 'uploadMessage']);
 
 //设置baseURL
 const stateStore = useStateStore();
@@ -55,7 +55,6 @@ const uploadContent = async () => {
     alert('Please input some information'); // 提示用户输入内容
     return;
   }
-
   try {
     console.log(inputValue.value.trim());
     //1. 让整个initialmode组件宽度压缩到pagewithoutsidebar的左半边，在父组件中codeBox要出现在右半边
@@ -64,22 +63,14 @@ const uploadContent = async () => {
       emit("firstUpload",ref(1));
       isFirstTime = 1;
     }
-    //2. 在initialmode中，文字描述要消失了，wholeinputbox的位置也要下移，右上方出现用户聊天框
+    //2. 上传输入内容给initialmode，在chatbox弹出用户输入
+    emit("uploadMessage", inputValue.value.trim());
 
     //3. 调用ollamaapi，左上方出现ai聊天框
 
     //最后输入框清零
     inputValue.value = '';
   }
-  // try {
-  //   // 替换为你的后端接口 URL
-  //   const response = await axios.post(baseURL, {
-  //     content: inputValue.value,
-  //   });
-  //   // 成功上传后的处理逻辑
-  //   console.log('上传成功:', response.data);
-  //   alert('内容已成功上传！');
-  // }
   catch (error) {
     // 错误处理
     console.error('上传失败:', error);
