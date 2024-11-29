@@ -39,9 +39,7 @@ const changelang = (message) => {
   codelanguage.value = message
 }
 
-const exampleCode = ref(`
-print("Hello world!")
-`);
+const exampleCode = ref(`print("Hello world!")`);
 const codelanguage = ref("python")
 
 const codeBoxAppearance = (message) => {

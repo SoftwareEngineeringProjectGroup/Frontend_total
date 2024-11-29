@@ -54,7 +54,7 @@ onBeforeMount(() => {
     alert("Please set an IPv4 address")
   }
   // 正确的 baseURL 应该是你后端服务的地址
-  baseURL = 'http://127.0.0.1:11434/api/generate';
+  baseURL = "http://10.252.130.135:8000/ai/back";
 
 });
 
