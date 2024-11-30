@@ -15,8 +15,6 @@
   </div>
 </template>
 
-
-
 <script setup lang="ts">
 import InitialMode from "@/components/Programming_dev_1/InitialMode.vue";
 import codeBox from "@/components/Programming_dev_1/codeBox.vue"
@@ -32,14 +30,17 @@ const uploadMessageToBackend = (message) => {
 }
 
 const changecode = (message) => {
-  exampleCode.value = message;
+  exampleCode.value = '\n' + message;
+  // exampleCode.value = message;
+  console.log(exampleCode.value)
 }
 
 const changelang = (message) => {
   codelanguage.value = message
 }
 
-const exampleCode = ref(`print("Hello world!")`);
+const exampleCode = ref(`
+print("Hello world!")`);
 const codelanguage = ref("python")
 
 const codeBoxAppearance = (message) => {
@@ -62,13 +63,14 @@ const codeBoxAppearance = (message) => {
 /* 仅在 is_codeBox === 1 时生效的样式 */
 .codeBox-active .initiate {
   position: absolute;
+  width: 100vw;
   left: 20px;
-  z-index: 2;
+  z-index: 1;
 }
 
 .codeBox-active .codeBox {
   position: absolute;
-  width: 50vw;
+  width: 45vw;
   height: 100vh;
   right: 100px;
   z-index: 1;

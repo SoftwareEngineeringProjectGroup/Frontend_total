@@ -33,6 +33,7 @@
   </div>
 </template>
 
+
 <script setup lang="ts">
 import { ref, watch, defineProps } from 'vue';
 import hljs from 'highlight.js'; // 引入 highlight.js
@@ -69,7 +70,7 @@ const updateCode = (newCode: string) => {
 };
 
 // 监听 code 属性变化并更新高亮和行号
-watch(() => props.code, updateCode, { immediate: true });
+watch(() => props.code, updateCode, { immediate: true },);
 
 // 复制代码的功能
 const copyCode = () => {
@@ -83,7 +84,12 @@ const downloadCode = () => {
   const blob = new Blob([props.code], { type: 'text/plain' }); // 创建文件 Blob
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob); // 创建 Blob URL
-  link.download = `code.${props.language}`; // 设置文件名，后缀为语言名
+  if (props.language == 'python'){
+    link.download = `code.py`; // 设置文件名，后缀为语言名
+  }
+  else {
+    link.download = `code.${props.language}`; // 设置文件名，后缀为语言名
+  }
   link.click();
 };
 </script>
@@ -91,7 +97,7 @@ const downloadCode = () => {
 <style scoped>
 /* 主容器样式 */
 .code-box {
-  position: relative;
+  position: relative; /* 使按钮组定位相对于该容器 */
   background-color: #2d2d2d; /* 深色背景 */
   color: #f8f8f2; /* 字体颜色 */
   padding: 16px;
@@ -129,7 +135,7 @@ const downloadCode = () => {
 .line-numbers {
   background-color: #333333; /* 行号背景 */
   color: #888888; /* 行号颜色 */
-  padding: 8px 12px;
+  padding: 2px 12px;
   border-radius: 8px 0 0 8px;
   text-align: right;
   user-select: none; /* 禁止选中行号 */
@@ -144,21 +150,22 @@ const downloadCode = () => {
 /* 代码块样式 */
 .code-block {
   margin: 0;
-  padding: 16px;
+  padding: 0px 10px;
   background: transparent;
   font-size: 14px;
-  white-space: pre;
+  white-space: pre-wrap;
   overflow-x: auto;
   border-radius: 0 8px 8px 0;
 }
 
 /* 按钮组样式 */
 .button-group {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
+  position: absolute; /* 按钮组定位在父容器内部 */
+  bottom: 10px;      /* 距离容器底部 10px */
+  right: 10px;       /* 距离容器右侧 10px */
   display: flex;
-  gap: 8px; /* 按钮间距 */
+  gap: 8px;          /* 按钮间距 */
+  z-index: 10;       /* 确保按钮在其他内容之上 */
 }
 
 /* 按钮样式 */

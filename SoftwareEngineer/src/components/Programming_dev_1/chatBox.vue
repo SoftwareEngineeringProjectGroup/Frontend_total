@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, defineProps, watch } from 'vue';
+import { ref, nextTick, defineProps, watch, onMounted, onBeforeUnmount } from 'vue';
 import { marked } from 'marked';
 
 const props = defineProps({
@@ -134,7 +134,32 @@ const scrollToBottom = () => {
   });
 };
 
-// 滚动到底部（初始化调用）
+// 使用 MutationObserver 监听 message-box 内容变化，确保自动滚动到底部
+let observer;
+onMounted(() => {
+  const messageBox = document.querySelector('.message-box');
+
+  if (messageBox) {
+    observer = new MutationObserver(() => {
+      scrollToBottom(); // 每当 DOM 更新时滚动到底部
+    });
+
+    // 配置 MutationObserver 监听子节点变化
+    observer.observe(messageBox, {
+      childList: true,
+      subtree: true,
+    });
+  }
+});
+
+onBeforeUnmount(() => {
+  // 销毁 MutationObserver
+  if (observer) {
+    observer.disconnect();
+  }
+});
+
+// 初始滚动到底部
 scrollToBottom();
 </script>
 
@@ -143,7 +168,7 @@ scrollToBottom();
   display: flex;
   flex-direction: column;
   height: 100vh;
-  width: 700px;
+  width: 40vw;
   border: 1px solid #ccc;
   border-radius: 8px;
   overflow: hidden;
