@@ -26,6 +26,7 @@ import sleepingGif from '@/assets/lamb/sleeping.gif';
 import successGif from '@/assets/lamb/success.gif';
 import shakingGif from '@/assets/lamb/shaking.gif';
 import doubtGif from '@/assets/lamb/doubt.gif';
+import hljs from "highlight.js";
 
 let baseURL = "" //共有url
 let store = useStateStore()
@@ -49,7 +50,17 @@ const showAnswer = ref(false)
 const inputText = ref('');
 const message = ref("");
 
-const md = new MarkdownIt();
+const md = new MarkdownIt({
+  highlight: function (str, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return `<pre class="hljs"><code>${hljs.highlight(str, {language: lang}).value}</code></pre>`;
+      } catch (__) {
+      }
+    }
+    return `<pre class="hljs"><code>${md.utils.escapeHtml(str)}</code></pre>`;
+  },
+});
 
 const renderedText = (text) => {
   return md.render(text);
@@ -134,18 +145,17 @@ const fetchAnswer = async (input) => {
 
   } catch (error) {
     console.error('Error fetching dynamic recipe:', error);
-
     if (error.message === "请求超时") {
-      // ErrorPop("Timeout");
+      ErrorPop("Timeout");
     } else {
-      // ErrorPop("404 Warning");
+      ErrorPop("404 Warning");
     }
   }
 };
 
 //右击触发
 const onRightClick = (event) => {
-  if (showAnswer.value) {
+  if (showInput.value) {
     showAnswer.value = false;
     showInput.value = false;
     gifNow.value=gifType.value.sleeping;
@@ -154,8 +164,11 @@ const onRightClick = (event) => {
     // showAnswer.value = true
     // console.log("触发", event);
   }
+}
 
-
+const ErrorPop=(text)=>{
+  gifNow.value=gifType.value.doubt;
+  message.value=text
 }
 
 </script>
@@ -175,8 +188,8 @@ const onRightClick = (event) => {
 }
 
 .drag-icon {
-  width: 110px;
-  height: 110px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   overflow: hidden;
   cursor: grab;

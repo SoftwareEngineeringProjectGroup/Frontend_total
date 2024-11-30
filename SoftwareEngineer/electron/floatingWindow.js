@@ -5,12 +5,11 @@ let floatingWindow;
 
 function createFloatingWindow() {
     floatingWindow = new BrowserWindow({
-        width: 400,
-        height: 1000,
+        width: 390,
+        height: 900,
         frame: false,
         alwaysOnTop: true,
         transparent:true,
-
         webPreferences: {
             contextIsolation: true,
             preload: path.join(__dirname, 'preload.js'), // 使用 preload.js
@@ -31,9 +30,9 @@ function createFloatingWindow() {
 function handleFloatingWindowEvents() {
     ipcMain.on('open-floating-window', () => {
         console.log('Main process received request to open floating window.');
-        if (!floatingWindow) {
+        // if (!floatingWindow) {
             createFloatingWindow();
-        }
+        // }
     });
 }
 

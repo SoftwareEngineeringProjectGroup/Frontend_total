@@ -1,59 +1,92 @@
-<!--<template>-->
-<!--  <div>-->
-<!--    &lt;!&ndash; 按钮点击时触发文件选择框 &ndash;&gt;-->
-<!--    <button @click="triggerFileInput">选择图片</button>-->
-
-<!--    &lt;!&ndash; 隐藏的文件输入框 &ndash;&gt;-->
-<!--    <input ref="fileInput" type="file" @change="onFileChange" style="display: none" />-->
-
-<!--    &lt;!&ndash; 显示选择的图片 &ndash;&gt;-->
-<!--    <div v-if="imageUrl">-->
-<!--      <img :src="imageUrl" alt="上传的图片" style="max-width: 100%; height: auto;" />-->
-<!--    </div>-->
-<!--  </div>-->
-<!--</template>-->
-
-<!--<script setup>-->
-<!--import { ref } from 'vue';-->
-
-<!--// 响应式数据，存储图片的 URL-->
-<!--const imageUrl = ref('');-->
-
-<!--// 使用 ref 获取文件输入框-->
-<!--const fileInput = ref(null);-->
-
-<!--// 手动触发文件选择框-->
-<!--const triggerFileInput = () => {-->
-<!--  fileInput.value.click(); // 触发隐藏的文件输入框-->
-<!--};-->
-
-<!--// 处理文件选择-->
-<!--const onFileChange = (event) => {-->
-<!--  const file = event.target.files[0]; // 获取选中的文件-->
-<!--  if (file) {-->
-<!--    const reader = new FileReader(); // 创建 FileReader 实例-->
-<!--    reader.onload = (e) => {-->
-<!--      imageUrl.value = e.target.result; // 图片读取完成后设置 imageUrl 为文件内容（base64 编码）-->
-<!--    };-->
-<!--    reader.readAsDataURL(file); // 将文件读取为 Data URL（base64 编码）-->
-<!--  }-->
-<!--};-->
-<!--</script>-->
-
-<!--<style scoped>-->
-<!--button {-->
-<!--  margin-bottom: 10px;-->
-<!--}-->
-
-<!--img {-->
-<!--  margin-top: 10px;-->
-<!--  max-width: 100%; /* 保证图片在屏幕宽度内显示 */-->
-<!--  height: auto;-->
-<!--}-->
-<!--</style>-->
 <template>
-  <SideBar/>
+  <div class="back_color">
+    <div class="left">
+      <Left/>
+    </div>
+    <div class="content-container" :style="{ marginLeft: marginLeftValue + 'px' }">
+      <page/>
+    </div>
+  </div>
 </template>
-<script setup>
-import SideBar from "@/components/SideBar.vue";
+
+<script setup lang="ts">
+import {onBeforeMount, ref, watch} from 'vue'
+import Left from "../components/SideBar.vue";
+import page from "../components/Programming_dev_1/pageWithoutSidebar.vue";
+import {useStateStore} from "@/stores/stateStore.ts";
+
+let marginLeftValue = ref(85)
+// 获取 Pinia Store
+const stateStore = useStateStore();
+// 监听 stateStore.isOpenValue 的变化
+
+
+onBeforeMount(() => {
+  stateStore.isOpenValue ? marginLeftValue.value = 200 : marginLeftValue.value = 64;
+
+  // console.log('Value from store:', state.value, isCollapse.value);
+});
+watch(() => stateStore.isOpenValue, (newValue) => {
+  if (newValue === 0) {
+    decreaseMargin();
+  } else if (newValue === 1) {
+    increaseMargin();
+  }
+});
+
+// 渐渐减小 margin-left 的方法
+const decreaseMargin = () => {
+  let interval = setInterval(() => {
+    if (marginLeftValue.value > 64) { // 最小的 margin-left 值
+      marginLeftValue.value -= 10;
+    } else {
+      marginLeftValue.value = 64;
+      clearInterval(interval);
+    }
+  }, 20); // 每 30 毫秒调整10
+};
+
+// 渐渐增加 margin-left 的方法
+const increaseMargin = () => {
+  let interval = setInterval(() => {
+    if (marginLeftValue.value < 200) { // 最大的 margin-left 值
+      marginLeftValue.value += 20;
+    } else {
+      marginLeftValue.value = 200;
+      clearInterval(interval);
+    }
+  }, 20); // 每 30 毫秒调整10
+};
 </script>
+
+<style scoped>
+.left {
+  position: fixed; /* 固定在页面左边 */
+  /* 不需要应用 fade 动画 */
+}
+
+@keyframes fade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+/* 只在 .back_color 上应用动画 */
+.content-container {
+  height: 100vh;
+  background: linear-gradient(90deg, #c0ffc0, #ffffb9, #ffb0b0, #ffb0b0, #c2c6ff);
+  background-size: 400% 400%;
+  animation: fade 3s, gradient-flow 7s 5s ease forwards;
+}
+</style>

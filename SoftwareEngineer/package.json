@@ -22,6 +22,7 @@
     "highlight.js": "^11.10.0",
     "js-audio-recorder": "^1.0.7",
     "markdown-it": "^14.1.0",
+    "marked": "^15.0.3",
     "pinia": "^2.2.4",
     "typewriter-effect": "^2.21.0",
     "unplugin-auto-import": "^0.18.3",
