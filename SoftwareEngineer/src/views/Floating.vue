@@ -17,7 +17,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import {ref, onBeforeMount} from 'vue';
 import MarkdownIt from 'markdown-it';
 import 'highlight.js/styles/github.css';
@@ -30,6 +30,8 @@ import hljs from "highlight.js";
 
 let baseURL = "" //共有url
 let store = useStateStore()
+let wi=ref<number>(0)
+let he=ref<number>(0)
 
 
 onBeforeMount(() => {
@@ -62,7 +64,7 @@ const md = new MarkdownIt({
   },
 });
 
-const renderedText = (text) => {
+const renderedText = (text:string) => {
   return md.render(text);
 };
 
@@ -90,7 +92,7 @@ const toggleEnter = () => {
 
 
 //发送请求
-const fetchAnswer = async (input) => {
+const fetchAnswer = async (input:string) => {
   const timeout = 10000; // 设置超时时间（以毫秒为单位，例如10秒）
   const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error("请求超时")), timeout)
@@ -159,8 +161,10 @@ const onRightClick = (event) => {
     showAnswer.value = false;
     showInput.value = false;
     gifNow.value=gifType.value.sleeping;
+    changeSize(390,85);
   } else {
     showInput.value = true;
+    changeSize(390,900);
     // showAnswer.value = true
     // console.log("触发", event);
   }
@@ -169,6 +173,11 @@ const onRightClick = (event) => {
 const ErrorPop=(text)=>{
   gifNow.value=gifType.value.doubt;
   message.value=text
+}
+
+//窗口大小
+const changeSize=(width:number,height:number)=>{
+  window.electronAPI.resizeFloatingWindow(width,height);
 }
 
 </script>
@@ -230,7 +239,7 @@ const ErrorPop=(text)=>{
 .markdown-body {
   box-sizing: border-box;
   min-width: 50px;
-  max-width: 370px;
+  max-width: 500px;
   margin: 2px auto;
   padding: 15px;
   border-radius: 15px;

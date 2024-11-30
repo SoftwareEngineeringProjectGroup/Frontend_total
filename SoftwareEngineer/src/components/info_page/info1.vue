@@ -16,7 +16,7 @@
           :key="index"
           class="question-bubble"
           @click="handleBubbleClick(index)"
-          @dblclick="handleDoubleClick(index)"
+          @contextmenu="handleDoubleClick(index)"
           size="large"
       >
         {{ ask.user.text }}
@@ -601,7 +601,6 @@ function openFloating() {
   justify-content: flex-start; /* 调整为 flex-start，使内容向上对齐 */
   height: 100vh;
   padding: 180px 20px 20px; /* 减小顶部的 padding，使内容向上移动 */
-  background-color: #8fefdd;
 }
 
 /* 其他样式保持不变 */

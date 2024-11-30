@@ -3,7 +3,6 @@
     <div class="left">
       <SideBar/>
     </div>
-
     <!--      主体-->
     <div class="content-container" :style="{ marginLeft: marginLeftValue + 'px' }">
       <Info1/>
@@ -83,11 +82,11 @@ const increaseMargin = () => {
   width: 100vw; /* 视口宽度 */
   height: 100vh; /* 视口高度 */
   /*background: linear-gradient(135deg, #4f5bd5, #962fbf, #d62976, #f58529, #ffcc70);*/
-  background-color: #ffffff;
   overflow: hidden; /* 防止滚动条 */
   margin: 0;
   background-size: 400% 400%; /* 放大背景尺寸 */
   /*animation: gradient-flow 7s ease infinite; 更快的动画速度 */
+  background-color: #8fefdd;
 }
 
 @keyframes gradient-flow {

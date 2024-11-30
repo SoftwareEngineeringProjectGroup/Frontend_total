@@ -56,7 +56,7 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "public/img1.ico"
+      "icon": "public/Lamb.ico"
     },
     "mac": {
       "target": "dmg",
