@@ -1,7 +1,9 @@
 <template>
   <div class="app" @click="handleClick">
     <!-- 第一步：HELLO 动画 -->
-    <div v-if="currentStep === 1" class="text" :class="{ visible: clickCount === 1, move: clickCount === 2, 'tracking-in-contract': clickCount === 1 }">HELLO</div>
+    <div v-if="currentStep === 1" class="text"
+         :class="{ visible: clickCount === 1, move: clickCount === 2, 'tracking-in-contract': clickCount === 1 }">HELLO
+    </div>
 
     <!-- 第二步：显示文字 “I'm your personal health AI-de!” -->
     <div v-if="currentStep === 2" class="subtext" :class="{ 'show-subtext': showSubtext }">I'm your personal
@@ -9,7 +11,8 @@
     </div>
 
     <!-- 第三步：显示 “Plzzz tell me sth about you!” -->
-    <div v-if="currentStep === 3" class="final-text" :class="{ 'final-move': clickCount === 3, 'text-focus-in': clickCount === 3 }">
+    <div v-if="currentStep === 3" class="final-text"
+         :class="{ 'final-move': clickCount === 3, 'text-focus-in': clickCount === 3 }">
       Plzzz tell me sth about you!
     </div>
 
@@ -17,8 +20,12 @@
     <div v-if="currentStep === 4" class="gender-selection">
       <h2>PLEASE SELECT YOUR GENDER</h2>
       <div class="buttons-container">
-        <button class="gender-button male" :class="{ selected: selectedGender === 'male' }" @click.stop="selectGender('male')">&#9794;</button>
-        <button class="gender-button female" :class="{ selected: selectedGender === 'female' }" @click.stop="selectGender('female')">&#9792;</button>
+        <button class="gender-button male" :class="{ selected: selectedGender === 'male' }"
+                @click.stop="selectGender('male')">&#9794;
+        </button>
+        <button class="gender-button female" :class="{ selected: selectedGender === 'female' }"
+                @click.stop="selectGender('female')">&#9792;
+        </button>
       </div>
     </div>
 
@@ -27,7 +34,9 @@
       <button class="button" @click.stop="redirectToExample">
         Try It Now :)
         <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
-          <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm4.28 10.28a.75.75 0 000-1.06l-3-3a.75.75 0 10-1.06 1.06l1.72 1.72H8.25a.75.75 0 000 1.5h5.69l-1.72 1.72a.75.75 0 101.06 1.06l3-3z" clip-rule="evenodd"></path>
+          <path fill-rule="evenodd"
+                d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm4.28 10.28a.75.75 0 000-1.06l-3-3a.75.75 0 10-1.06 1.06l1.72 1.72H8.25a.75.75 0 000 1.5h5.69l-1.72 1.72a.75.75 0 101.06 1.06l3-3z"
+                clip-rule="evenodd"></path>
         </svg>
       </button>
     </div>
@@ -35,14 +44,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import {onBeforeMount, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {useStateStore} from "@/stores/stateStore";
 
 const router = useRouter()
 const clickCount = ref(0)
 const currentStep = ref(1)
 const showSubtext = ref(false)
 const selectedGender = ref(null)
+const store = useStateStore()
 
 const handleClick = () => {
   clickCount.value++
@@ -66,8 +77,16 @@ const selectGender = (gender) => {
   selectedGender.value = gender
 }
 
+//播放过的话就跳转
+onBeforeMount(() => {
+  if (store.isPlayed) redirectToExample()
+
+  // console.log('Value from store:', state.value, isCollapse.value);
+});
+
 const redirectToExample = () => {
-  router.push({ name: 'DietitianMain' });
+  store.setisPlayed(true)
+  router.push({name: 'DietitianMain'});
 };
 
 </script>
@@ -82,9 +101,10 @@ const redirectToExample = () => {
   font-family: Arial, sans-serif;
   cursor: pointer;
   flex-direction: column;
-  background: rgb(255,253,169);
-  background: radial-gradient(circle, rgba(255,253,169,1) 0%, rgba(178,249,145,1) 100%);
+  background: rgb(255, 253, 169);
+  background: radial-gradient(circle, rgba(255, 253, 169, 1) 0%, rgba(178, 249, 145, 1) 100%);
 }
+
 /* 新增 .text-focus-in 动画样式 */
 .text-focus-in {
   animation: text-focus-in 1s cubic-bezier(0.55, 0.085, 0.68, 0.53) both;
@@ -261,6 +281,7 @@ const redirectToExample = () => {
   left: -100px;
   opacity: 0.6;
 }
+
 /* 新增 .tracking-in-contract 动画样式 */
 .tracking-in-contract {
   animation: tracking-in-contract 0.8s cubic-bezier(0.215, 0.61, 0.355, 1.000) both;

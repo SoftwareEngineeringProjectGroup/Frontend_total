@@ -8,6 +8,7 @@ export const useStateStore = defineStore('state', {
         aiImagePath: "./static/aiDefault.jpg", // 存储ai图片路径
         audioType: 'D', // 音频类型
         baseUrl: "http://10.252.130.135:8000",//IPv4地址
+        isPlayed: false //检测是否已经播放过介绍页面
     }),
     actions: {
         setisOpenValue(newValue: number) {
@@ -24,6 +25,9 @@ export const useStateStore = defineStore('state', {
         },
         setbaseUrl(newValue: string) {
             this.baseUrl = newValue;
+        },
+        setisPlayed(newValue: boolean) {
+            this.isPlayed=newValue;
         },
     },
 });
