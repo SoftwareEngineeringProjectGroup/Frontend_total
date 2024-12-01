@@ -9,6 +9,7 @@ import Dietitian from '@/views/Dietitian.vue';
 import Setting from '@/views/Setting.vue';
 import Floating from "@/views/Floating.vue";
 import Intro from "@/views/Intro.vue";
+import Feedback from "@/views/Feedback.vue";
 
 const routes = [
     { path: '/', name: 'Home', component: Home, meta: { title: 'Lambda' } },
@@ -19,6 +20,7 @@ const routes = [
     { path: '/dietitian/main', name: 'DietitianMain', component: Dietitian, meta: { title: 'Nutritionist' } },
     { path: '/setting', name: 'Setting', component: Setting, meta: { title: 'Settings' } },
     { path: '/floating', name: 'Floating', component: Floating, meta: { title: 'Floating Window' } },
+    { path: '/feedback', name: 'Feedback', component: Feedback, meta: { title: 'Feedback' } },
 ];
 
 const router = createRouter({

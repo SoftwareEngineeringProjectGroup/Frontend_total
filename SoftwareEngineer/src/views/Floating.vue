@@ -30,8 +30,6 @@ import hljs from "highlight.js";
 
 let baseURL = "" //共有url
 let store = useStateStore()
-let wi=ref<number>(0)
-let he=ref<number>(0)
 
 
 onBeforeMount(() => {
@@ -83,6 +81,7 @@ const toggleEnter = () => {
   if(inputText.value===""){
     showAnswer.value=false;
     gifNow.value = gifType.value.doubt;
+    changeSize(390,85);
     return;
   }
   gifNow.value = gifType.value.shaking//接收到了前的动作

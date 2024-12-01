@@ -10,13 +10,13 @@
         <!-- 系统消息头像 -->
         <template v-if="!message.isUser">
           <div class="avatar">
-            <img src="https://via.placeholder.com/40" alt="System Avatar" />
+            <img src="@/assets/aiDefault.jpg" alt="System Avatar" />
           </div>
         </template>
 
         <!-- 显示消息内容 -->
         <span
-            class="message-text"
+            class="message-text markdown-body"
             v-html="message.isMarkdown ? renderMarkdown(message.text) : message.text"
         ></span>
       </div>
@@ -25,8 +25,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, defineProps, watch } from 'vue';
-import { marked } from 'marked';
+import { ref, nextTick, defineProps, watch, onMounted, onBeforeUnmount } from 'vue';
+import 'highlight.js/styles/github.css';
+import hljs from "highlight.js";
+import MarkdownIt from "markdown-it";
+
 
 const props = defineProps({
   message: String, // 用户消息
@@ -120,8 +123,20 @@ watch(
 );
 
 // 渲染 Markdown 内容
+const md = new MarkdownIt({
+  highlight: function (str, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return `<pre class="hljs"><code>${hljs.highlight(str, {language: lang}).value}</code></pre>`;
+      } catch (__) {
+      }
+    }
+    return `<pre class="hljs"><code>${md.utils.escapeHtml(str)}</code></pre>`;
+  },
+});
+
 const renderMarkdown = (text: string) => {
-  return marked(text);
+  return md.render(text);
 };
 
 // 滚动到最新消息
@@ -134,7 +149,32 @@ const scrollToBottom = () => {
   });
 };
 
-// 滚动到底部（初始化调用）
+// 使用 MutationObserver 监听 message-box 内容变化，确保自动滚动到底部
+let observer;
+onMounted(() => {
+  const messageBox = document.querySelector('.message-box');
+
+  if (messageBox) {
+    observer = new MutationObserver(() => {
+      scrollToBottom(); // 每当 DOM 更新时滚动到底部
+    });
+
+    // 配置 MutationObserver 监听子节点变化
+    observer.observe(messageBox, {
+      childList: true,
+      subtree: true,
+    });
+  }
+});
+
+onBeforeUnmount(() => {
+  // 销毁 MutationObserver
+  if (observer) {
+    observer.disconnect();
+  }
+});
+
+// 初始滚动到底部
 scrollToBottom();
 </script>
 
@@ -143,8 +183,8 @@ scrollToBottom();
   display: flex;
   flex-direction: column;
   height: 100vh;
-  width: 700px;
-  border: 1px solid #ccc;
+  width: 40vw;
+
   border-radius: 8px;
   overflow: hidden;
   background-color: #f9f9f9;
@@ -180,7 +220,7 @@ scrollToBottom();
   background-color: #f9f9f9;
   align-self: flex-start; /* 左对齐 */
   text-align: left;
-  max-width: 80%; /* 限制消息宽度 */
+  max-width: 95%; /* 限制消息宽度 */
 }
 
 /* 用户消息样式 */
@@ -189,6 +229,7 @@ scrollToBottom();
   align-self: flex-end; /* 右对齐 */
   text-align: right;
   max-width: 80%; /* 限制消息宽度 */
+  padding: 0px;
 }
 
 /* 系统消息头像 */
@@ -209,7 +250,34 @@ scrollToBottom();
 /* 打字效果 */
 .message-text {
   display: inline-block;
-  white-space: pre-wrap; /* 保持换行 */
   word-wrap: break-word;
+}
+
+
+.markdown-body {
+  box-sizing: border-box;
+  min-width: 50px;
+  max-width: 500px;
+  margin: 2px auto;
+  padding: 15px;
+  border-radius: 15px;
+  font-size: 16px;
+  overflow: auto;
+}
+
+@media (max-width: 767px) {
+  .markdown-body {
+    padding: 15px;
+  }
+}
+
+/* 隐藏滚动条（Webkit 浏览器） */
+.markdown-body::-webkit-scrollbar {
+  display: none;
+}
+
+/* 隐藏滚动条（Firefox） */
+.markdown-body {
+  scrollbar-width: none; /* Firefox */
 }
 </style>

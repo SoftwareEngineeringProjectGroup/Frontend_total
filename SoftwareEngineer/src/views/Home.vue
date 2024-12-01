@@ -103,6 +103,48 @@
  <Gather/>
 </template>
 <script setup>
-import SideBar from "@/components/SideBar.vue";
+
 import Gather from "@/components/home_page/gather.vue";
 </script>
+
+<!--<template>-->
+<!--  <div>-->
+<!--    <h2>上传图片</h2>-->
+<!--    <input type="file" @change="handleFileChange" />-->
+<!--    <div v-if="imageUrl">-->
+<!--      <h3>预览:</h3>-->
+<!--      <img :src="imageUrl" alt="Uploaded Image" style="max-width: 200px;" />-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</template>-->
+
+<!--<script setup>-->
+<!--import { ref } from 'vue'-->
+<!--import { useStateStore } from "@/stores/stateStore"-->
+
+<!--// 使用 Pinia 状态管理-->
+<!--const store = useStateStore()-->
+<!--const imageUrl = ref(null)-->
+
+<!--// 监听 store 中的图片变化-->
+<!--imageUrl.value = store.imageUrl-->
+
+<!--// 处理文件选择，转换为 Base64 并存储到 Pinia store-->
+<!--const handleFileChange = (event) => {-->
+<!--  const file = event.target.files[0]-->
+<!--  if (file) {-->
+<!--    const reader = new FileReader()-->
+
+<!--    reader.onloadend = () => {-->
+<!--      // 将 Base64 字符串存储到 Pinia-->
+<!--      store.setuserImagePath(reader.result)-->
+<!--    }-->
+
+<!--    reader.readAsDataURL(file) // 将文件转换为 Base64-->
+<!--    console.log(store.userImagePath)-->
+<!--  }-->
+
+<!--}-->
+<!--</script>-->
+
+

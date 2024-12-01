@@ -65,7 +65,7 @@
     </el-sub-menu>
 
     <!-- 用户评论，目前禁用 -->
-    <el-menu-item index="3">
+    <el-menu-item index="/feedback">
       <el-icon>
         <chat-dot-square/>
       </el-icon>

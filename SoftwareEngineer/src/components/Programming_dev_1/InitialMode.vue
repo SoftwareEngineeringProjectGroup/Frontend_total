@@ -1,7 +1,7 @@
 <template>
   <div class="container"
        :style="{
-      width: isShrink !== 0 ? '800px' : '100%',
+      width: isShrink !== 0 ? '40vw' : '100%',
       alignSelf: isShrink !== 0 ? 'flex-start' : 'center',
     }"
   >
@@ -9,6 +9,7 @@
         v-if="isShrink !== 0"
         class="chatBox"
         :style="{
+
           overflowY: 'auto'
         }"
     >
@@ -95,6 +96,9 @@ const uploadMessageToOllama = async (message) => {
       const decoder = new TextDecoder('utf-8');
       let done = false;
       let accumulatedResponse = ref('');
+      let longestCode = ''; // 用来保存最长的代码块
+      let selectedCode = ''; // 用来保存最终选择的代码块
+      let languageDetected = false; // 标记是否检测到带有语言的代码块
 
       while (!done) {
         const { value, done: readerDone } = await reader.read();
@@ -110,12 +114,26 @@ const uploadMessageToOllama = async (message) => {
                 accumulatedResponse.value += parsedChunk.response; // 拼接响应内容
                 // 处理并提取代码块
                 const { code, language } = extractCodeBlock(accumulatedResponse.value);
+
                 if (code) {
-                  console.log(`提取到的代码: ${code}`);
-                  console.log(`代码类型: ${language}`);
-                  emit('getcode', code);
-                  emit('getlang', language)
+                  // 如果检测到语言，优先选择这个代码块
+                  if (language && !languageDetected) {
+                    selectedCode = code; // 使用带有语言的代码块
+                    languageDetected = true;
+                    console.log(`选择的代码（带有语言）：${selectedCode}`);
+                    console.log(`代码语言：${language}`);
+                    emit('getcode', selectedCode);
+                    emit('getlang', language);
+                  } else {
+                    // 如果没有语言，选择最长的代码块
+                    if (code.length > longestCode.length) {
+                      longestCode = code;
+                      console.log(`选择的代码（最长的代码）：${longestCode}`);
+                      emit('getcode', longestCode);
+                    }
+                  }
                 }
+
                 responseMessage.value = accumulatedResponse.value;
               }
             } catch (error) {
@@ -126,7 +144,15 @@ const uploadMessageToOllama = async (message) => {
         done = readerDone;
         isComplete.value = done;
       }
-      console.log('所有内容已接收:', accumulatedResponse.value);
+
+      // 在流传输结束时，从 accumulatedResponse 中去掉选定的 code
+      if (selectedCode) {
+        responseMessage.value = accumulatedResponse.value.replace(selectedCode, '').trim();
+      } else if (longestCode) {
+        responseMessage.value = accumulatedResponse.value.replace(longestCode, '').trim();
+      }
+      // responseMessage.value = accumulatedResponse.value.replace("```", '').trim();
+      console.log('所有内容已接收，最终的 responseMessage:', responseMessage.value);
     }
   } catch (error) {
     // 错误处理
@@ -134,6 +160,8 @@ const uploadMessageToOllama = async (message) => {
     alert('上传失败，请稍后重试！');
   }
 };
+
+
 
 // 提取 Markdown 格式中的代码块及其语言
 const extractCodeBlock = (text) => {
