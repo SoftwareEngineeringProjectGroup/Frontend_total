@@ -1,6 +1,6 @@
 <template>
   <div class="dietitian">
-    <aside class="sidebar" >
+    <aside class="sidebar">
       <SideBar />
     </aside>
 
@@ -15,7 +15,7 @@
         <div class="input-container">
           <input
               type="text"
-              placeholder="请输入您的需求"
+              placeholder="Enter your requirement"
               class="input-box"
               v-model="userInput"
               @keyup.enter="handleInput"
@@ -30,7 +30,7 @@
       </div>
 
       <div v-else>
-        <button @click="goBack">返回主界面</button>
+        <button @click="goBack">Back to Main</button>
 
         <div v-if="currentView === 'recipe'" class="recipe-background">
           <table class="recipe-table">
@@ -54,10 +54,10 @@
         </div>
 
         <div v-if="currentView === 'visualization'" class="visualization-background">
-          <p>可视化界面内容：</p>
+          <p>Visualization Interface:</p>
           <div class="features">
-            <button @click="() => showChart('pie')">查看饼图</button>
-            <button @click="() => showChart('line')">查看折线图</button>
+            <button @click="() => showChart('pie')">View Pie Chart</button>
+            <button @click="() => showChart('line')">View Line Chart</button>
           </div>
           <div v-if="chartType" class="chart">
             <chart-component :type="chartType" />
@@ -65,7 +65,7 @@
         </div>
 
         <div v-if="currentView === 'photo-recognition'" class="photo-recognition-background">
-          <p>拍照识别界面内容...</p>
+          <p>Photo Recognition Interface...</p>
         </div>
       </div>
     </main>
@@ -82,10 +82,9 @@ const currentView = ref('main');
 const chartType = ref(null);
 const store = useStateStore();
 const userInput = ref('');
-const recipes = ref({}); // 存储食谱数据
+const recipes = ref({}); // Store recipe data
 
-
-// 假设从后端获取的食谱数据
+// Mock recipe data fetched from the backend
 const fetchRecipes = () => {
   recipes.value = {
     Monday: { breakfast: "Oatmeal", lunch: "Salad", dinner: "Grilled Chicken" },
@@ -98,12 +97,12 @@ const fetchRecipes = () => {
   };
 };
 
-fetchRecipes(); // 初始化时获取食谱数据
+fetchRecipes(); // Fetch recipe data on initialization
 
 const handleInput = () => {
-  // 处理输入内容（例如显示食谱等）
+  // Handle input (e.g., display recipes)
   console.log(userInput.value);
-  userInput.value = ''; // 清空输入框
+  userInput.value = ''; // Clear input box
 };
 
 const showRecipe = () => {
@@ -127,38 +126,33 @@ const goBack = () => {
   chartType.value = null;
 };
 
-//以下是伸缩框变化的方法
-
-//记录margin
+// Methods for sidebar expansion/collapse
 let marginLeftValue = ref(100);
 
-//挂载时更新margin
 onBeforeMount(() => {
   store.isOpenValue ? marginLeftValue.value = 200 : marginLeftValue.value = 69;
-
 });
+
 const decreaseMargin = () => {
   let interval = setInterval(() => {
-    if (marginLeftValue.value > 63) { // 最小的 margin-left 值
+    if (marginLeftValue.value > 63) { // Minimum margin-left value
       marginLeftValue.value -= 10;
     } else {
       clearInterval(interval);
     }
-  }, 20); // 每 30 毫秒调整10
+  }, 20);
 };
 
-// 渐渐增加 margin-left 的方法
 const increaseMargin = () => {
   let interval = setInterval(() => {
-    if (marginLeftValue.value < 200) { // 最大的 margin-left 值
+    if (marginLeftValue.value < 200) { // Maximum margin-left value
       marginLeftValue.value += 20;
     } else {
       clearInterval(interval);
     }
-  }, 20); // 每 30 毫秒调整10
+  }, 20);
 };
 
-//检测变化
 watch(() => store.isOpenValue, (newValue) => {
   if (newValue === 0) {
     decreaseMargin();
@@ -175,8 +169,8 @@ watch(() => store.isOpenValue, (newValue) => {
   font-family: Arial, sans-serif;
   height: 100vh;
   background: linear-gradient(135deg, #8fefdd, #5eb3ff, #b78cff, #ff9de2);
-  background-size: 400% 400%; /* 放大背景尺寸 */
-  animation: gradient-flow 7s ease infinite; /* 默认不流动 */
+  background-size: 400% 400%;
+  animation: gradient-flow 7s ease infinite;
 }
 
 @keyframes gradient-flow {
@@ -192,15 +186,6 @@ watch(() => store.isOpenValue, (newValue) => {
 }
 
 .sidebar {
-  /*background-color: #f0f4f8;
-  width: 20%;
-  padding: 20px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: width 0.3s;*/
   position: fixed;
 }
 
@@ -225,10 +210,9 @@ watch(() => store.isOpenValue, (newValue) => {
   padding: 20px;
   width: 400px;
   margin: auto;
-  border-radius: 10px; /* 圆角设置 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 可选，增加阴影效果 */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
-
 
 .whale-container {
   display: flex;
@@ -300,7 +284,6 @@ button:hover {
   background-color: #45a049;
 }
 
-/* 食谱部分样式 */
 .recipe-background {
   background-color: #FFC0CB;
   width: 1000px;

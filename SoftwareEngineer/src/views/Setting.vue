@@ -37,3 +37,51 @@ const setUrl=()=>{
   margin-left: 10px;
 }
 </style>
+
+<!--<template>-->
+<!--  <div class="message-text markdown-body" v-html="renderedText(message)"></div>-->
+<!--</template>-->
+<!--<script setup>-->
+<!--import {ref} from "vue";-->
+<!--import MarkdownIt from "markdown-it";-->
+<!--import 'highlight.js/styles/github.css'; // 确保引入样式文件-->
+<!--let message=ref('##  👋 Hi! This is your local AI assistant.\n' +-->
+<!--    '\n' +-->
+<!--    '**You are experiencing a local AI chatbot that is not restricted by the network and can communicate with you anytime, anywhere.**\n' +-->
+<!--    '\n' +-->
+<!--    '**No need to worry about the network connection, no need to use the Internet** As long as you input your ideas or questions, I will do my best to help you.')-->
+
+
+<!--// 初始化 MarkdownIt 实例，并启用代码高亮功能-->
+<!--const md = new MarkdownIt({-->
+<!--  highlight: function (str, lang) {-->
+<!--    if (lang && hljs.getLanguage(lang)) {-->
+<!--      try {-->
+<!--        return `<pre class="hljs"><code>${hljs.highlight(str, {language: lang}).value}</code></pre>`;-->
+<!--      } catch (__) {-->
+<!--      }-->
+<!--    }-->
+<!--    return `<pre class="hljs"><code>${md.utils.escapeHtml(str)}</code></pre>`;-->
+<!--  },-->
+<!--});-->
+
+<!--const renderedText = (text) => {-->
+<!--  return md.render(text);-->
+<!--};-->
+<!--</script>-->
+
+<!--<style scoped>-->
+<!--.markdown-body {-->
+<!--  box-sizing: border-box;-->
+<!--  min-width: 200px;-->
+<!--  max-width: 980px;-->
+<!--  margin: 0 auto;-->
+<!--  padding: 15px;-->
+<!--}-->
+
+<!--@media (max-width: 767px) {-->
+<!--  .markdown-body {-->
+<!--    padding: 15px;-->
+<!--  }-->
+<!--}-->
+<!--</style>-->

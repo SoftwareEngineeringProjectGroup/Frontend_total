@@ -6,7 +6,7 @@ import time
 
 def generate_audio(request):
     if request.method == "POST":
-        session = Session("7fb2606c76044e31ac929852eff46742")
+        session = Session("b2efe1fb3a7f4986acc416da7708bc27")
         dic1 = {"L": "738d0cc1a3e9430a9de2b544a466a7fc",
                 "Di": "54a5170264694bfc8e9ad98df7bd89c3",
                 "C": "e4642e5edccd4d9ab61a69e82d4f8a14",
@@ -19,7 +19,7 @@ def generate_audio(request):
             # 获取请求体中的 JSON 数据
             data = request.POST
             text = data.get("text", "")
-            print(text)
+            # print(text)
             ref_id = dic1[data.get("id", "De")]
             # print(text)
             if not text:
@@ -58,7 +58,7 @@ def speechToText(request):
         # b = time.time()
 
         # 音频识别
-        session = Session("7fb2606c76044e31ac929852eff46742")
+        session = Session("b2efe1fb3a7f4986acc416da7708bc27")
         response = session.asr(ASRRequest(audio=audio_data))
         # c = time.time()
         # print(c-b)

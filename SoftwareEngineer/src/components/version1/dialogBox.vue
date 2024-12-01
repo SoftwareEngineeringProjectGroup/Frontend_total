@@ -11,7 +11,7 @@
     </div>
     <input @keydown="handleKeyDown" class="message-input" v-model="inputValue" placeholder="Please enter here"
            style="height: auto;">
-    <el-button type="success" :icon="Promotion" @click="sendToMain" size="large" circle/>
+    <el-button type="success" :icon="Promotion" @click="sendToMain" size="large" style="font-size: 20px;" circle/>
     <!-- 点击按钮控制语音识别的开始和停止 -->
     <el-button
         :type="isRecording ? 'warning' : 'primary'"
@@ -19,6 +19,7 @@
         @click="toggleVoiceRecognition"
         size="large"
         :loading="isLoading"
+        style="font-size: 20px;"
         circle
     ></el-button>
 <!--    选择语音类型-->
@@ -60,9 +61,11 @@ const emit = defineEmits(['send-to-main']);
 let inputValue = ref('');
 
 // 发送输入内容给父组件
+let ask_tip=0;
 const sendToMain = () => {
   // console.log(`发送${inputValue.value}到main`);
-  emit('send-to-main', inputValue.value);
+  emit('send-to-main', [ask_tip, inputValue.value]);
+  ask_tip+=1;
   inputValue.value = '';
 };
 
@@ -147,28 +150,39 @@ const sendAudioToApi = async (audioBlob: any) => {
   form.append("audio", audioBlob, "recording.wav");
 
   // 配置 fetch 选项
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000); // 10秒后中止请求
+
   const options = {
     method: 'POST',
     headers: {
-      Authorization: ''
+      Authorization: '',
     },
-    body: form
+    body: form,
+    signal: controller.signal, // 将 AbortController 的 signal 传递给 fetch
   };
 
   // 发送请求
   try {
-    const response = await fetch(baseURL+'/speech/text', options);
+    const response = await fetch(baseURL + '/speech/text', options);
+    clearTimeout(timeoutId); // 请求完成前清除定时器
     const data = await response.json();
     result.value = data.text || ErrorPop("No voice input detected"); // 假设 API 返回的识别文本字段是 text
-    console.log(result.value)
+    console.log(result.value);
     inputValue.value += data.text;
   } catch (error) {
-    console.error("请求失败:", error);
-    ErrorPop("Unrecognized")
+    if (error.name === 'AbortError') {
+      console.error("请求超时:", error);
+      ErrorPop("Request timed out");
+    } else {
+      console.error("请求失败:", error);
+      ErrorPop("Unrecognized");
+    }
   } finally {
     isLoading.value = false;
   }
 };
+
 
 
 //选择音频类型

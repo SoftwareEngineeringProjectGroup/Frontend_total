@@ -25,7 +25,7 @@ urlpatterns = [
     path('ai/back', views.proxy_generate_request),
 
     path("ai/internet/back", views.connect_internet),
-    path("file/back", views.generate_bubble_sort_file),
+    # path("file/back", views.generate_bubble_sort_file),
     path("speech/text", views.speechToText),
     path("text/speech", views.generate_audio)
 ]

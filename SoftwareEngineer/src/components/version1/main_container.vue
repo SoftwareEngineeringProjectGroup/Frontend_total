@@ -13,7 +13,7 @@ import {ref} from 'vue'
 let sharedInput = ref('');
 
 // 处理 bottom 子组件的发送动作，将数据传递给 main 子组件
-const handleSendToMain = (inputValue:string) => {
+const handleSendToMain = (inputValue:any) => {
   // console.log("main收到");
   sharedInput.value = inputValue;
   // console.log(sharedInput.value);
