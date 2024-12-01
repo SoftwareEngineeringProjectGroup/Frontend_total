@@ -17,7 +17,7 @@
               type="text"
               placeholder="Enter your request"
               class="input-box"
-              v-model="userInput"
+              v-model="recipeInput"
               @keyup.enter="handleInput"
           />
         </div>
@@ -38,47 +38,36 @@
 
         <!-- 食谱页面 -->
         <div v-if="currentView === 'recipe'" class="recipe-background">
-          <div class="input-container">
-            <input
-                type="text"
-                placeholder="Generate new meals..."
-                class="input-box"
-                v-model="recipeInput"
-                @keyup.enter="handleInput"
-            />
-          </div>
 
-          <table class="recipe-table">
-            <thead>
-            <tr>
-              <th>Day</th>
-              <th>Breakfast</th>
-              <th>Lunch</th>
-              <th>Dinner</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="(meals, day) in recipes" :key="day">
-              <td class="interactive-cell">{{ day }}</td>
-              <td class="interactive-cell">{{ meals.breakfast || 'Loading...' }}</td>
-              <td class="interactive-cell">{{ meals.lunch || 'Loading...' }}</td>
-              <td class="interactive-cell">{{ meals.dinner || 'Loading...' }}</td>
-            </tr>
-            </tbody>
-          </table>
+          <div v-if="tableVisible">
+            <table class="recipe-table">
+              <thead>
+              <tr>
+                <th>Day</th>
+                <th>Breakfast</th>
+                <th>Lunch</th>
+                <th>Dinner</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="(meals, day) in recipes" :key="day">
+                <td class="interactive-cell">{{ day }}</td>
+                <td class="interactive-cell">{{ meals.breakfast || 'Loading...' }}</td>
+                <td class="interactive-cell">{{ meals.lunch || 'Loading...' }}</td>
+                <td class="interactive-cell">{{ meals.dinner || 'Loading...' }}</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
 
           <p>{{ aiResponse }}</p>
         </div>
 
         <!-- 可视化页面 -->
         <div v-if="currentView === 'visualization'" class="visualization-background">
-          <p>Visualization Content:</p>
-          <div class="features">
-            <button @click="showChart('pie')">View Pie Chart</button>
-            <button @click="showChart('line')">View Line Chart</button>
-          </div>
-          <div v-if="chartType" class="chart">
-            <ChartComponent :type="chartType"/>
+          <!-- 直接显示饼图，不需要按钮 -->
+          <div v-if="chartType === 'pie'" class="chart">
+            <ChartComponent :type="chartType" />
           </div>
         </div>
 
@@ -92,9 +81,11 @@
 </template>
 
 <script setup>
-import {ref, onBeforeMount, watch} from 'vue';
-import {useStateStore} from '@/stores/stateStore';
-import {ElMessage} from "element-plus";
+import { ref, onBeforeMount, watch } from 'vue';
+import { useStateStore } from '@/stores/stateStore';
+import { ElMessage } from "element-plus";
+import ChartComponent from "@/components/dietitian_page/ChartComponent.vue";
+import SideBar from "@/components/SideBar.vue";
 
 const currentView = ref('main');
 const chartType = ref(null);
@@ -102,21 +93,27 @@ const store = useStateStore();
 const userInput = ref('');
 const recipeInput = ref('');
 const aiResponse = ref('');
-const recipes = ref({});
-let recipeData = ref("") //每次接收到的数据
-let baseURL = "" //共有url
+const recipes = ref({}); // 动态食谱存储
+let recipeData = ref(''); // 每次接收到的动态数据
+let baseURL = ''; // 共有url
 
+const tableVisible = ref(false); // 控制表格是否可见，初始为不可见
 
 onBeforeMount(() => {
-  baseURL = store.baseUrl; //先设置成默认url
+  baseURL = store.baseUrl;
 });
 
+// 正则表达式去除markdown样式和提示内容
+const cleanText = (text) => {
+  text = text.replace(/\*{1,2}/g, '').trim(); // 去除 * 和 **（Markdown）
+  return text;
+};
 
-// 随机生成食谱数据
+// 随机生成食谱数据（作为备用）
 const generateRandomRecipe = (customPrompt) => {
   const sampleMeals = [
-    "Pancakes", "Omelette", "Smoothie", "Grilled Chicken", "Salad",
-    "Soup", "Pasta", "Steamed Fish", "Sushi", "BBQ Ribs"
+    "Oatmeal Pancakes", "Vegetable Egg White Omelette", "Green Smoothie", "Grilled Chicken Breast", "Mixed Vegetable Salad",
+    "High-Fiber Tofu Soup", "Whole Wheat Pasta", "Steamed Salmon", "Vegetable Sushi", "Baked Lean Ribs"
   ];
 
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -135,25 +132,12 @@ const generateRandomRecipe = (customPrompt) => {
   if (customPrompt) {
     aiResponse.value = `New meals generated based on input: "${customPrompt}"`;
   }
+
+  tableVisible.value = true; // 显示表格
 };
 
-// // 设置请求超时时间
-// const TIMEOUT = 5000;
-//
-// // 创建超时 Promise
-// const createTimeoutPromise = (timeout) => {
-//   return new Promise((_, reject) => {
-//     setTimeout(() => {
-//       reject(new Error('Request timed out'));
-//     }, timeout);
-//   });
-// };
-
-// 向后端发送请求以获取动态食谱
-
-
 const fetchDynamicRecipe = async (input) => {
-  const timeout = 10000; // 设置超时时间（以毫秒为单位，例如10秒）
+  const timeout = 10000; // 设置超时时间（10秒）
 
   const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error("请求超时")), timeout)
@@ -171,26 +155,25 @@ const fetchDynamicRecipe = async (input) => {
           prompt: input,
         }),
       }),
-      timeoutPromise, // 如果 fetch 未完成，此 promise 将优先返回超时错误
+      timeoutPromise, // 如果 fetch 未完成，则返回超时错误
     ]);
 
     if (!response.body) {
       throw new Error("流式返回没有body");
     }
 
-
     const reader = response.body.getReader();
     const decoder = new TextDecoder("utf-8");
     let done = false;
-    recipeData.value = "";//每次接收前先清空
+    recipeData.value = ""; // 每次接收前先清空
 
     while (!done) {
-      const {value, done: readerDone} = await reader.read();
+      const { value, done: readerDone } = await reader.read();
       done = readerDone;
 
       if (value) {
         // 解码数据块并按行分割
-        const chunk = decoder.decode(value, {stream: true});
+        const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split("\n");
 
         // 逐行解析并处理
@@ -198,22 +181,69 @@ const fetchDynamicRecipe = async (input) => {
           if (line.trim()) { // 忽略空行
             try {
               const parsedChunk = JSON.parse(line);
-              recipeData.value += parsedChunk.response; //获得的返回添加进食谱data
-              if (parsedChunk.response !== " ") console.log("正在接收食谱中,这次接收到：", parsedChunk.response);
-
+              let responseText = parsedChunk.response || '';
+              responseText = cleanText(responseText); // 清除markdown和提示内容
+              recipeData.value += responseText + " "; // 将返回的食谱数据添加到食谱data
+              if (responseText) {
+                console.log("正在接收食谱中,这次接收到：", responseText);
+              }
             } catch (parseError) {
               console.warn("JSON解析失败，跳过该行: ", line);
+            } finally {
+              // console.log("接收完成");
+              console.log("最终接收结果（recipeData）：", recipeData.value);
+
+              // 正则表达式匹配格式：Day{Breakfast:()Lunch:()Dinner:()}
+              const updateRecipeFromDynamicData = (data) => {
+                const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+                const newRecipes = {};
+
+                // 为每一天提取 Breakfast、Lunch 和 Dinner
+                days.forEach(day => {
+                  // 定义正则表达式匹配每一天的 Breakfast, Lunch 和 Dinner
+                  const dayRegex = new RegExp(
+                      `${day}\\s*:\\s*Breakfast\\s*:\\s*([\\s\\S]+?)\\s*Lunch\\s*:\\s*([\\s\\S]+?)\\s*Dinner\\s*:\\s*([\\s\\S]+?)` +
+                      `(?=\\s*(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|Tips|Notes|$))`,
+                      'i'
+                  );
+
+                  const match = data.match(dayRegex);
+
+                  if (match) {
+                    // 提取每天的三餐数据
+                    newRecipes[day] = {
+                      breakfast: match[1]?.trim() || '',
+                      lunch: match[2]?.trim() || '',
+                      dinner: match[3]?.trim() || '',
+                    };
+                  } else {
+                    // 如果没有匹配到数据，保留为空
+                    newRecipes[day] = {
+                      breakfast: '',
+                      lunch: '',
+                      dinner: '',
+                    };
+                  }
+                });
+
+                // 更新食谱并显示
+                recipes.value = newRecipes;
+                tableVisible.value = true; // 数据加载完毕后显示表格
+                console.log('更新后的食谱:', recipes.value);
+              };
+
+              // 更新食谱
+              updateRecipeFromDynamicData(recipeData.value);
+
             }
           }
         });
       }
     }
 
-    console.log("接收完成");
-    console.log("最终接收结果（recipeData）：", recipeData.value)
   } catch (error) {
     console.error('Error fetching dynamic recipe:', error);
-    generateRandomRecipe(input);
+    generateRandomRecipe(input); // 如果请求失败，则生成随机食谱
     if (error.message === "请求超时") {
       ErrorPop("Timeout");
     } else {
@@ -221,18 +251,19 @@ const fetchDynamicRecipe = async (input) => {
     }
   }
 };
+
 const ErrorPop = (info, time = 3000) => {
   ElMessage({
     showClose: true,
     message: info,
     type: 'error',
     duration: time
-  })
-}
+  });
+};
 
 const handleInput = async () => {
   if (!recipeInput.value.trim()) return;
-  await fetchDynamicRecipe(recipeInput.value);
+  await fetchDynamicRecipe(recipeInput.value); // 获取动态食谱
   recipeInput.value = ''; // 清空输入框
 };
 
@@ -241,14 +272,15 @@ const showRecipe = () => {
   generateRandomRecipe(); // 默认初始化食谱
 };
 
-const showVisualization = () => (currentView.value = 'visualization');
+const showVisualization = () => {
+  currentView.value = 'visualization'; // 显示可视化页面
+  chartType.value = 'pie';             // 默认显示饼图
+};
 const showPhotoRecognition = () => (currentView.value = 'photo-recognition');
 const goBack = () => {
   currentView.value = 'main';
   chartType.value = null;
 };
-
-const showChart = (type) => (chartType.value = type);
 
 const marginLeftValue = ref(100);
 onBeforeMount(() => {
@@ -291,15 +323,6 @@ watch(
 }
 
 .sidebar {
-  /*background-color: #f0f4f8;
-  width: 20%;
-  padding: 20px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: width 0.3s;*/
   position: fixed;
 }
 
@@ -324,8 +347,8 @@ watch(
   padding: 20px;
   width: 800px;
   margin: auto;
-  border-radius: 10px; /* Rounded corners */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional, add shadow effect */
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .whale-container {
@@ -341,6 +364,9 @@ watch(
   cursor: text;
 }
 
+.whale-image:hover {
+  cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><text y="20" font-size="20">🥕</text></svg>') 1 10, auto;
+}
 
 .input-container {
   display: flex;
@@ -358,9 +384,47 @@ watch(
   transition: border-color 0.3s;
 }
 
+button {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #646cff, #4f5bd5);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 0 4px 15px rgba(79, 91, 213, 0.4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+}
+
+button:hover {
+  background: linear-gradient(135deg, #4f5bd5, #646cff);
+  box-shadow: 0 6px 20px rgba(79, 91, 213, 0.6);
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(79, 91, 213, 0.4);
+}
+
+.icon-button {
+  font-size: 48px;
+  margin: 0 20px;
+  cursor: pointer;
+  transition: transform 0.2s, color 0.2s;
+}
+
+.icon-button:hover {
+  transform: scale(1.1);
+  color: #4f5bd5;
+}
+
 .input-box:focus {
   border-color: #4f5bd5;
   outline: none;
+  box-shadow: 0 0 8px rgba(79, 91, 213, 0.6);
 }
 
 .button-container {
@@ -369,74 +433,122 @@ watch(
   margin-top: 20px;
 }
 
-.icon-button {
-  font-size: 48px;
-  margin: 0 20px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.icon-button:hover {
-  transform: scale(1.1);
-}
-
-button {
-  padding: 10px 20px;
-  background-color: #4f5bd5;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-bottom: 20px;
-}
-
-button:hover {
-  background-color: #646cff;
-}
-
 /* Recipe section styles */
 .recipe-background {
-  background-color: #FFC0CB;
+  background: linear-gradient(135deg, rgba(255, 192, 203, 0.8), rgba(255, 105, 180, 0.8)); /* 静态渐变背景色 */
   width: 1200px;
-  height: 400px;
+  height: 700px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 15px;
   margin: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* 添加柔和的阴影效果 */
+  position: relative;
+  overflow: hidden;
+}
+
+/* 玻璃化效果 */
+.recipe-background::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1); /* 半透明的覆盖层 */
+  backdrop-filter: blur(10px); /* 添加模糊效果 */
+  border-radius: 15px; /* 保证与父容器的圆角一致 */
+  z-index: -1; /* 将模糊层放到后面 */
 }
 
 .recipe-table {
   border-collapse: collapse;
   width: 95%;
   text-align: center;
+  margin: 0 auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .recipe-table th,
 .recipe-table td {
-  border: 1px solid #ccc;
-  padding: 10px;
-  transition: transform 0.3s;
+  border: 1px solid #ddd;
+  padding: 12px 15px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  color: #333;
+  transition: transform 0.3s, background-color 0.3s ease-in-out, box-shadow 0.3s ease; /* 更流畅的过渡效果 */
 }
 
 .recipe-table th {
-  background-color: #f2f2f2;
+  background-color: #3875d7;
+  color: #fff;
+  font-weight: bold;
+}
+
+.recipe-table td {
+  background-color: #fff;
+  color: #555;
+}
+
+.recipe-table tr:nth-child(even) td {
+  background-color: #f9f9f9;
+}
+
+.recipe-table tr:nth-child(odd) td {
+  background-color: #ffffff;
+}
+
+.interactive-cell {
+  position: relative;
+  cursor: pointer;
+  border-radius: 8px;
 }
 
 .interactive-cell:hover {
-  transform: scale(1.1);
-  background-color: #e0ffe0;
+  transform: scale(1.05);
+  background-color: #f0f8ff;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+.interactive-cell:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5);
+}
+
+.recipe-table th:hover {
+  background-color: #0056b3;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .recipe-table {
+    width: 100%;
+  }
+  .recipe-table th, .recipe-table td {
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .recipe-table th {
+    font-size: 13px;
+  }
 }
 
 .visualization-background {
-  background-color: #AFEEEE;
-  width: 1000px;
-  height: 500px;
+  background: linear-gradient(135deg, #AFEEEE, #4ac1f7); /* 静态渐变背景色 */
+  width: 1200px;
+  height: 700px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 15px;
   margin: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* 添加柔和的阴影效果 */
+  position: relative;
+  overflow: hidden;
 }
 
 .photo-recognition-background {
@@ -451,17 +563,25 @@ button:hover {
 }
 
 .features {
-  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 5px;
 }
 
 .features button {
-  margin: 10px;
+  margin-top: 10px;
+  margin-left: 0;
   padding: 10px 20px;
   background-color: #4f5bd5;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  position: absolute;
+  left: 30px;
+  top: 30px;
 }
 
 .features button:hover {
@@ -469,8 +589,8 @@ button:hover {
 }
 
 .chart {
-  margin-top: 30px;
-  width: 500px;
-  height: 300px;
+  margin-top: 0;
+  width: 850px;
+  height: 550px;
 }
 </style>
