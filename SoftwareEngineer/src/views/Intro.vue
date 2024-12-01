@@ -77,12 +77,6 @@ const selectGender = (gender) => {
   selectedGender.value = gender
 }
 
-//播放过的话就跳转
-onBeforeMount(() => {
-  if (store.isPlayed) redirectToExample()
-
-  // console.log('Value from store:', state.value, isCollapse.value);
-});
 
 const redirectToExample = () => {
   store.setisPlayed(true)
