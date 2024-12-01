@@ -287,16 +287,35 @@ onBeforeMount(() => {
   store.isOpenValue ? (marginLeftValue.value = 200) : (marginLeftValue.value = 69);
 });
 
-watch(
-    () => store.isOpenValue,
-    (newValue) => {
-      if (newValue === 0) {
-        marginLeftValue.value = 69;
-      } else if (newValue === 1) {
-        marginLeftValue.value = 200;
-      }
+watch(() => store.isOpenValue, (newValue) => {
+  if (newValue === 0) {
+    decreaseMargin();
+  } else if (newValue === 1) {
+    increaseMargin();
+  }
+});
+
+// 渐渐减小 margin-left 的方法
+const decreaseMargin = () => {
+  let interval = setInterval(() => {
+    if (marginLeftValue.value > 69) { // 最小的 margin-left 值
+      marginLeftValue.value -= 10;
+    } else {
+      clearInterval(interval);
     }
-);
+  }, 20); // 每 30 毫秒调整10
+};
+
+// 渐渐增加 margin-left 的方法
+const increaseMargin = () => {
+  let interval = setInterval(() => {
+    if (marginLeftValue.value < 200) { // 最大的 margin-left 值
+      marginLeftValue.value += 20;
+    } else {
+      clearInterval(interval);
+    }
+  }, 20); // 每 30 毫秒调整10
+};
 </script>
 
 
