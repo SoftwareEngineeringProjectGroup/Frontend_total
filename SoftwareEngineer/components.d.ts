@@ -37,6 +37,8 @@ declare module 'vue' {
     PageWithoutSidebar: typeof import('./src/components/Programming_dev_1/pageWithoutSidebar.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Setting_gather: typeof import('./src/components/setting_page/setting_gather.vue')['default']
+    Setting_main: typeof import('./src/components/setting_page/setting_main.vue')['default']
     SideBar: typeof import('./src/components/SideBar.vue')['default']
     Test: typeof import('./src/components/version1/test.vue')['default']
     WholeInputBox: typeof import('./src/components/Programming_dev_1/WholeInputBox.vue')['default']
