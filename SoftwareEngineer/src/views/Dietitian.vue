@@ -60,14 +60,13 @@
             </table>
           </div>
 
-          <p>{{ aiResponse }}</p>
         </div>
 
         <!-- 可视化页面 -->
         <div v-if="currentView === 'visualization'" class="visualization-background">
           <!-- 直接显示饼图，不需要按钮 -->
           <div v-if="chartType === 'pie'" class="chart">
-            <ChartComponent :type="chartType"/>
+            <ChartComponent :type="chartType" />
           </div>
         </div>
 
@@ -81,16 +80,15 @@
 </template>
 
 <script setup>
-import {ref, onBeforeMount, watch} from 'vue';
-import {useStateStore} from '@/stores/stateStore';
-import {ElMessage} from "element-plus";
+import { ref, onBeforeMount, watch } from 'vue';
+import { useStateStore } from '@/stores/stateStore';
+import { ElMessage } from "element-plus";
 import ChartComponent from "@/components/dietitian_page/ChartComponent.vue";
 import SideBar from "@/components/SideBar.vue";
 
 const currentView = ref('main');
 const chartType = ref(null);
 const store = useStateStore();
-const userInput = ref('');
 const recipeInput = ref('');
 const aiResponse = ref('');
 const recipes = ref({}); // 动态食谱存储
@@ -112,8 +110,16 @@ const cleanText = (text) => {
 // 随机生成食谱数据（作为备用）
 const generateRandomRecipe = (customPrompt) => {
   const sampleMeals = [
-    "Oatmeal Pancakes", "Vegetable Egg White Omelette", "Green Smoothie", "Grilled Chicken Breast", "Mixed Vegetable Salad",
-    "High-Fiber Tofu Soup", "Whole Wheat Pasta", "Steamed Salmon", "Vegetable Sushi", "Baked Lean Ribs"
+    "Oatmeal Pancakes with Fresh Berries and a Dollop of Greek Yogurt – A balanced breakfast with fiber, antioxidants, and protein to boost energy and support digestion.",
+    "Vegetable Egg White Omelette with Sautéed Spinach and Whole Grain Toast – High in protein and fiber, this meal supports muscle recovery and provides lasting energy.",
+    "Green Smoothie with Kale, Banana, Chia Seeds, and Almond Milk – A nutrient-packed smoothie with vitamins, potassium, and omega-3s for digestion and heart health.",
+    "Grilled Chicken Breast with Quinoa and Steamed Broccoli – Lean protein from chicken, complete protein from quinoa, and fiber from broccoli for a balanced meal.",
+    "Mixed Vegetable Salad with Avocado, Cherry Tomatoes, and Lemon-Tahini Dressing – A fresh salad with healthy fats, vitamins, and fiber for a nutrient boost.",
+    "High-Fiber Tofu Soup with Carrots, Mushrooms, and Barley – A warm soup with plant-based protein, fiber, and vitamins to support gut health and immunity.",
+    "Whole Wheat Pasta with Grilled Zucchini, Cherry Tomatoes, and Basil Pesto – A satisfying dish with fiber, vegetables, and healthy fats from pesto.",
+    "Steamed Salmon with Brown Rice, Asparagus, and a Light Dill Sauce – Omega-3 rich salmon with fiber-rich brown rice and asparagus for heart health.",
+    "Vegetable Sushi Rolls with Cucumber, Carrot, and Avocado – Light sushi with fiber, healthy fats, and antioxidants for a nutritious snack or meal.",
+    "Baked Lean Ribs with Sweet Potato Mash and a Side of Coleslaw – Protein-rich ribs with fiber-packed sweet potatoes and a crunchy, vitamin-filled side."
   ];
 
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -152,7 +158,8 @@ const fetchDynamicRecipe = async (input) => {
         },
         body: JSON.stringify({
           model: "gemma2:2b",
-          prompt: input,
+          prompt: 'Please provide a balanced and healthy weekly meal plan in the format of Monday{Breakfast:()Lunch:()Dinner:()}.'
+              +input,
         }),
       }),
       timeoutPromise, // 如果 fetch 未完成，则返回超时错误
@@ -168,12 +175,12 @@ const fetchDynamicRecipe = async (input) => {
     recipeData.value = ""; // 每次接收前先清空
 
     while (!done) {
-      const {value, done: readerDone} = await reader.read();
+      const { value, done: readerDone } = await reader.read();
       done = readerDone;
 
       if (value) {
         // 解码数据块并按行分割
-        const chunk = decoder.decode(value, {stream: true});
+        const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split("\n");
 
         // 逐行解析并处理
@@ -203,7 +210,7 @@ const fetchDynamicRecipe = async (input) => {
                   // 定义正则表达式匹配每一天的 Breakfast, Lunch 和 Dinner
                   const dayRegex = new RegExp(
                       `${day}\\s*:\\s*Breakfast\\s*:\\s*([\\s\\S]+?)\\s*Lunch\\s*:\\s*([\\s\\S]+?)\\s*Dinner\\s*:\\s*([\\s\\S]+?)` +
-                      `(?=\\s*(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|Tips|Notes|$))`,
+                      `(?=\\s*(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|Tips|Notes|Important|General|Remember|$))`,
                       'i'
                   );
 
@@ -262,10 +269,16 @@ const ErrorPop = (info, time = 3000) => {
 };
 
 const handleInput = async () => {
-  if (!recipeInput.value.trim()) return;
-  await fetchDynamicRecipe(recipeInput.value); // 获取动态食谱
-  recipeInput.value = ''; // 清空输入框
+  const inputvalue = recipeInput.value;  // 获取输入框的值并赋给变量
+  // 先清空输入框
+  recipeInput.value = '';
+
+  // 获取用户输入并传递给 fetchDynamicRecipe
+  if (inputvalue.trim()) {
+    await fetchDynamicRecipe(inputvalue); // 获取动态食谱
+  }
 };
+
 
 const showRecipe = () => {
   currentView.value = "recipe";
@@ -276,6 +289,7 @@ const showVisualization = () => {
   currentView.value = 'visualization'; // 显示可视化页面
   chartType.value = 'pie';             // 默认显示饼图
 };
+
 const showPhotoRecognition = () => (currentView.value = 'photo-recognition');
 const goBack = () => {
   currentView.value = 'main';
@@ -315,19 +329,6 @@ const increaseMargin = () => {
       clearInterval(interval);
     }
   }, 20); // 每 30 毫秒调整10
-};
-
-import {useRouter} from 'vue-router'
-
-const router = useRouter();
-
-onBeforeMount(() => {
-  if (!store.isPlayed) redirectToExample()
-});
-
-const redirectToExample = () => {
-  store.setisPlayed(true)
-  router.push({name: 'DietitianIntro'});
 };
 </script>
 
@@ -397,6 +398,7 @@ const redirectToExample = () => {
 }
 
 .whale-image:hover {
+  transform: scale(1.2);
   cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><text y="20" font-size="20">🥕</text></svg>') 1 10, auto;
 }
 
@@ -468,7 +470,7 @@ button:active {
 /* Recipe section styles */
 .recipe-background {
   background: linear-gradient(135deg, rgba(255, 192, 203, 0.8), rgba(255, 105, 180, 0.8)); /* 静态渐变背景色 */
-  width: 1200px;
+  width: 1400px;
   height: 700px;
   display: flex;
   align-items: center;
@@ -559,7 +561,6 @@ button:active {
   .recipe-table {
     width: 100%;
   }
-
   .recipe-table th, .recipe-table td {
     padding: 10px;
     font-size: 12px;

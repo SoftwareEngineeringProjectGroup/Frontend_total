@@ -59,7 +59,7 @@ def speechToText(request):
 
         # 音频识别
         session = Session("e945a7531a234b36a92d842c3b44802b")
-        response = session.asr(ASRRequest(audio=audio_data))
+        response = session.asr(ASRRequest(audio=audio_data,language="en"))
         # c = time.time()
         # print(c-b)
         if response.text == ".":

@@ -166,7 +166,7 @@ const getAnswer = async () => {
         },
         body: JSON.stringify({
           model: "gemma2:2b",
-          prompt: newMessage.value,
+          prompt: personalPrompt+newMessage.value,
         }),
       }),
       timeoutPromise, // 如果 fetch 未完成，此 promise 将优先返回超时错误
@@ -251,7 +251,7 @@ const fetchAndPlayAudio = async (text) => {
   text = org(text);
   if (audioType === "De") speakMessage(text);
   else {
-    SuccPop("Generating...", 5000);
+    SuccessPop("Generating...", 5000);
     const startTime = performance.now();
     try {
       const formData = new FormData();
@@ -271,6 +271,7 @@ const fetchAndPlayAudio = async (text) => {
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
       // closeSuccMessage();
+      SuccessPop("Playing...")
       audio.play();
 
       // 监听音频播放结束，释放 Blob URL
@@ -321,11 +322,13 @@ const speakMessage = (text) => {
 
 //头像载入和音频初始化和url初始化
 let baseURL = ""
+let personalPrompt = ""
 onBeforeMount(() => {
   aiAvatar.value = stateStore.aiImagePath;
   userAvatar.value = stateStore.userImagePath;
   stateStore.setaudioType("De"); //先设置成默认音频
   baseURL = stateStore.baseUrl; //先设置成默认url
+  personalPrompt = stateStore.personalPrompt;//个人prompt
 
   //初始化消息记录
   if (stateStore.chatHistory.length !== 0) messages.value = stateStore.chatHistory;
@@ -377,7 +380,7 @@ const ErrorPop = (info, time = 3000) => {
 
 
 //成功弹窗
-const SuccPop = (info, time = 2000) => {
+const SuccessPop = (info, time = 2000) => {
   ElMessage({
     showClose: true,
     message: info,

@@ -1,4 +1,3 @@
-
 <template>
   <div class="feedback-form">
     <div class="form-container">
@@ -62,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import {onBeforeMount, ref} from 'vue'
 import axios from 'axios'
 
 const feedback = ref({
@@ -87,25 +86,27 @@ const handleSubmit = async () => {
   error.value = false
   errorMessage.value = ''
 
-  // try {
-  //   const response = await sendFeedback(feedback.value)
-  //   if (response.status === 200) {
-  //     feedbackSent.value = true
-  //   } else {
-  //     throw new Error('Failed to submit feedback')
-  //   }
-  // } catch (err) {
-  //   error.value = true
-  //   errorMessage.value = err.message || 'An error occurred. Please try again.'
-  // } finally {
-  //   isSubmitting.value = false
-  // }
-  setTimeout(()=>{feedbackSent.value = true},2000);
+  try {
+    const response = await sendFeedback(feedback.value)
+    if (response.status === 200) {
+      console.log("发送成功")
+    } else {
+      throw new Error('Failed to submit feedback')
+    }
+  } catch (err) {
+    console.log("error", error)
+  } finally {
+    setTimeout(() => {
+      feedbackSent.value = true
+    }, 1000);
+
+  }
+
 
 }
 
 const sendFeedback = (feedbackData) => {
-  return axios.post('/api/feedback', feedbackData) // 这里的 '/api/feedback' 替换成你的服务器地址
+  return axios.post(baseURL+'/feedback', feedbackData) // 这里的 '/api/feedback' 替换成你的服务器地址
 }
 
 const validateEmail = () => {
@@ -116,6 +117,15 @@ const validateEmail = () => {
     emailInput.value.setCustomValidity("")
   }
 }
+import {useStateStore} from "@/stores/stateStore";
+
+let stateStore = useStateStore();
+let baseURL = '';
+onBeforeMount(() => {
+
+  baseURL = stateStore.baseUrl;
+
+});
 </script>
 
 <style scoped>
