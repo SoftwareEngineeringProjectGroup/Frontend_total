@@ -23,7 +23,7 @@
       </el-button>
     </div>
 
-<!--    <button @click="fileDelete">恢复</button>-->
+    <!--    <button @click="fileDelete">恢复</button>-->
     <!--    输入框-->
     <div class="input-container">
 
@@ -42,7 +42,8 @@
                  @click="triggerFileInput" circle/>
 
       <!--      悬浮窗按钮-->
-      <el-button type="info" size="large" class="dropdown-button" :icon="More" style="font-size: 20px;" @click="openFloating" circle/>
+      <el-button type="info" size="large" class="dropdown-button" :icon="More" style="font-size: 20px;"
+                 @click="openFloating" circle/>
 
       <!-- 隐藏的文件输入框 -->
       <input ref="fileInput" type="file" @change="onFileChange" style="display: none"/>
@@ -81,7 +82,8 @@ let asks = ref([{
   "ai": {text: "19th October"}
 }, {
   "user": {text: 'Tell some news', internet: true, isPhoto: false, photoUrl: ''},
-  "ai": {text: "Okay, here's a quick rundown on some current events:\n" +
+  "ai": {
+    text: "Okay, here's a quick rundown on some current events:\n" +
         "\n" +
         "**International:**\n" +
         "\n" +
@@ -105,7 +107,8 @@ let asks = ref([{
         "* **SpaceX continues its missions!**  We're getting closer to a future with regular space tourism and commercial lunar\n" +
         "ventures. 🚀\n" +
 
-        "Let me know if you want more details on any of these topics or have specific news areas you'd like me to focus on! 📰"}
+        "Let me know if you want more details on any of these topics or have specific news areas you'd like me to focus on! 📰"
+  }
 }, {
   "user": {text: 'Summarize', internet: true, isPhoto: false, photoUrl: ''},
   "ai": {text: "I will try"}
@@ -122,14 +125,12 @@ let asks = ref([{
         '\n' +
         'Enjoy your time in Foshan! 😊'
   }
-}
-
-]);
+}]);
 
 //点击气泡信息后输出历史信息
 const handleBubbleClick = (index: number) => {
   // 输出点击的气泡对应的 ai.text
-  console.log(asks.value[index].ai.text);
+  // console.log(asks.value[index].ai.text);
   expandedMessage.value = asks.value[index].ai.text;
   expandBall();
 };
@@ -241,6 +242,7 @@ const getAnswer = async () => {
       stopScaling();
     }
   }
+  saveHistory();
 };
 
 //错误弹窗
@@ -310,14 +312,14 @@ const sendCartoon = (text: string) => {
 };
 
 // 获取和谐颜色
-const getRandomHarmoniousColor = (i:number) => {
+const getRandomHarmoniousColor = (i: number) => {
   const colors = [['#e8cd3c', '#c24a1e', '#e1a941', '#cb533e', '#FF8C00'], ['#1e90ff', '#288cec', '#3289da', '#3c85c7', '#4682b4']];
 
   return colors[i][Math.floor(Math.random() * 5)];
 };
 
 // 为花瓣应用动画
-const applyPetalAnimation = (i:number) => {
+const applyPetalAnimation = (i: number) => {
   if (!ball.value) return; // 确保 ball 已经初始化
   const petals = ball.value.querySelectorAll('.petal');
   petals.forEach((petal, index) => {
@@ -376,7 +378,7 @@ const expandBall = async () => {
     // 扩展悬浮球的高度以适应内容
     gsap.to(ball.value, {
       width: '700px',  // 扩展宽度
-      height: calculatedHeight +  'px', // 加上一些 padding 以防止内容紧贴边缘
+      height: calculatedHeight + 'px', // 加上一些 padding 以防止内容紧贴边缘
       borderRadius: '20px',
       background: '#FFFFFF',
       duration: 1.5,
@@ -481,6 +483,8 @@ const stateStore = useStateStore();
 let baseURL = ""
 onBeforeMount(() => {
   baseURL = stateStore.baseUrl; //先设置成默认url
+  //初始化消息记录
+  if (stateStore.infoHistory.length !== 0) asks.value = stateStore.infoHistory;
 });
 
 // 临时改变悬浮球颜色
@@ -514,6 +518,7 @@ const handleDoubleClick = (index: number) => {
     // 如果用户点击取消，什么都不做
     console.log('Deletion cancelled');
   });
+  saveHistory();
 };
 
 //发送按钮的逻辑
@@ -569,7 +574,7 @@ const onFileChange = (event) => {
     reader.onload = (e) => {
       imageUrl.value = e.target.result; // 图片读取完成后设置 imageUrl 为文件内容（base64 编码）
       fileDelete();
-      console.log(imageUrl.value);
+      // console.log(imageUrl.value);
     };
     reader.readAsDataURL(file); // 将文件读取为 Data URL（base64 编码）
 
@@ -587,9 +592,12 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 //悬浮窗激活
 function openFloating() {
-
   window.electronAPI.openFloatingWindow();
   console.log("已按下");
+}
+
+const saveHistory = () => {
+  stateStore.setInfoHistory(asks.value);
 }
 
 </script>
@@ -616,7 +624,7 @@ function openFloating() {
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow-y: scroll;
-  scrollbar-width: none;  /* 隐藏滚动条 */
+  scrollbar-width: none; /* 隐藏滚动条 */
 }
 
 .past-info {

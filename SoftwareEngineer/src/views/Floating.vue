@@ -81,7 +81,6 @@ const toggleEnter = () => {
   if(inputText.value===""){
     showAnswer.value=false;
     gifNow.value = gifType.value.doubt;
-    changeSize(390,85);
     return;
   }
   gifNow.value = gifType.value.shaking//接收到了前的动作
