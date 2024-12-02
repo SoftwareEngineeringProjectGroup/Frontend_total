@@ -9,7 +9,6 @@
         v-if="isShrink !== 0"
         class="chatBox"
         :style="{
-
           overflowY: 'auto'
         }"
     >
@@ -56,7 +55,6 @@ onBeforeMount(() => {
   }
   // 正确的 baseURL 应该是你后端服务的地址
   baseURL = "http://10.252.130.135:8000/ai/back";
-
 });
 
 let userMessage = ref('')

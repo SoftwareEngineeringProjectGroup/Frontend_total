@@ -90,7 +90,3 @@ const increaseMargin = () => {
   animation: fade 3s, gradient-flow 7s 5s ease forwards;
 }
 </style>
-
-
-
-

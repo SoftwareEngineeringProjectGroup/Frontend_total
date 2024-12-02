@@ -72,7 +72,7 @@ const codeBoxAppearance = (message) => {
   position: absolute;
   width: 45vw;
   height: 100vh;
-  right: 100px;
+  right: 20px;
   z-index: 1;
 }
 
