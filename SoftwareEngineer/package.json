@@ -1,5 +1,5 @@
 {
-  "name": "softwareengineer",
+  "name": "lambda",
   "private": true,
   "main": "electron/main.js",
   "version": "0.0.0",
@@ -61,6 +61,13 @@
     "mac": {
       "target": "dmg",
       "icon": "public/img.icns"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "public/Lamb.ico",
+      "uninstallerIcon": "public/Lamb.ico",
+      "installerHeaderIcon": "public/Lamb.ico"
     }
   }
 }
