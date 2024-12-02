@@ -37,7 +37,8 @@
 <script setup lang="ts">
 import { ref, watch, defineProps } from 'vue';
 import hljs from 'highlight.js'; // 引入 highlight.js
-import 'highlight.js/styles/monokai.css'; // 更清晰的 Monokai 样式
+import 'highlight.js/styles/monokai.css';
+import {ElMessage} from "element-plus"; // 更清晰的 Monokai 样式
 
 // 高亮后的 HTML 内容
 const highlightedCode = ref('');
@@ -75,7 +76,11 @@ watch(() => props.code, updateCode, { immediate: true },);
 // 复制代码的功能
 const copyCode = () => {
   navigator.clipboard.writeText(props.code).then(() => {
-    alert('Code copied to clipboard!');
+    ElMessage({
+      showClose: true,
+      message: 'Code copied to clipboard!',
+      type: 'success',
+    });
   });
 };
 
