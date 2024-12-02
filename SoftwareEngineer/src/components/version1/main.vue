@@ -58,8 +58,7 @@ import emojiRegex from 'emoji-regex'; //去除emoji
 // 使用 ref 定义响应式变量
 const userAvatar = ref("./static/userDefault.jpg");  // 用户头像
 const aiAvatar = ref("./static");      // AI 头像
-const messages = ref([
-  {text: 'Who are you？', isUser: true, time: '2024/10/11 16:39', loading: false},
+const messages = ref([{text: 'Who are you？', isUser: true, time: '2024/10/11 16:39', loading: false},
   {
     text: '##  👋 Hi! This is your local AI assistant.\n' +
         '\n' +
@@ -69,9 +68,7 @@ const messages = ref([
     isUser: false,
     time: '2024/10/11 16:39',
     loading: false
-  },
-  // {text: 'Who are you？What is your name', isUser: false, time: '2024/10/12 16:39:40', loading: false},
-]);
+  }]);
 //loading用来记录是否正在加载
 
 let newMessage = ref(''); //发送的数据
@@ -119,6 +116,8 @@ const sendMessage = async () => {
       time: new Date().toLocaleString(),
       loading: false
     });
+    //保存
+    saveHistory();
     await nextTick();
     scrollToBottom();
     await sendAIMessage(); //  AI 回复
@@ -147,7 +146,6 @@ const sendAIMessage = async () => {
 
   }, 500);
 };
-
 
 
 const getAnswer = async () => {
@@ -185,12 +183,12 @@ const getAnswer = async () => {
     messages.value[messages.value.length - 1].loading = false; // 解除加载
 
     while (!done) {
-      const { value, done: readerDone } = await reader.read();
+      const {value, done: readerDone} = await reader.read();
       done = readerDone;
 
       if (value) {
         // 解码数据块并按行分割
-        const chunk = decoder.decode(value, { stream: true });
+        const chunk = decoder.decode(value, {stream: true});
         // console.log("chunk",chunk);
         const lines = chunk.split("\n");
 
@@ -220,8 +218,9 @@ const getAnswer = async () => {
       ErrorPop("404 Warning");
     }
   }
+  //保存
+  saveHistory();
 };
-
 
 
 //返回markdown
@@ -252,7 +251,7 @@ const fetchAndPlayAudio = async (text) => {
   text = org(text);
   if (audioType === "De") speakMessage(text);
   else {
-    SuccPop("Generating...",5000);
+    SuccPop("Generating...", 5000);
     const startTime = performance.now();
     try {
       const formData = new FormData();
@@ -328,8 +327,15 @@ onBeforeMount(() => {
   stateStore.setaudioType("De"); //先设置成默认音频
   baseURL = stateStore.baseUrl; //先设置成默认url
 
-  // console.log('Value from store:', state.value, isCollapse.value);
+  //初始化消息记录
+  if (stateStore.chatHistory.length !== 0) messages.value = stateStore.chatHistory;
+
 });
+
+//记录信息
+const saveHistory = () => {
+  stateStore.setChatHistory(messages.value);
+}
 
 // 一再接受inputValue
 import {watch} from 'vue';
@@ -358,32 +364,33 @@ const handleReceivedInput = (inputValue) => {
 };
 
 //错误弹窗
-const ErrorPop = (info,time=3000) => {
+const ErrorPop = (info, time = 3000) => {
   ElMessage({
     showClose: true,
     message: info,
     type: 'error',
-    duration:time
+    duration: time
   })
 }
 
 //音频的互动ui逻辑
 
 
-
 //成功弹窗
-const SuccPop = (info,time=2000) => {
+const SuccPop = (info, time = 2000) => {
   ElMessage({
     showClose: true,
     message: info,
     type: 'success',
-    duration:time
+    duration: time
   })
 }
 
 // 删除消息
 const deleteMessage = (index) => {
   messages.value.splice(index, 1);
+  //保存
+  saveHistory();
 };
 
 //web speech api

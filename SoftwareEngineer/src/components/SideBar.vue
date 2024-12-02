@@ -55,7 +55,7 @@
         </el-menu-item>
 
         <!-- 营养师 -->
-        <el-menu-item index="/dietitian">
+        <el-menu-item index="/dietitian/main">
           <el-icon>
             <DishDot/>
           </el-icon>

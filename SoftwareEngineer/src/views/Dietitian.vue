@@ -67,7 +67,7 @@
         <div v-if="currentView === 'visualization'" class="visualization-background">
           <!-- 直接显示饼图，不需要按钮 -->
           <div v-if="chartType === 'pie'" class="chart">
-            <ChartComponent :type="chartType" />
+            <ChartComponent :type="chartType"/>
           </div>
         </div>
 
@@ -81,9 +81,9 @@
 </template>
 
 <script setup>
-import { ref, onBeforeMount, watch } from 'vue';
-import { useStateStore } from '@/stores/stateStore';
-import { ElMessage } from "element-plus";
+import {ref, onBeforeMount, watch} from 'vue';
+import {useStateStore} from '@/stores/stateStore';
+import {ElMessage} from "element-plus";
 import ChartComponent from "@/components/dietitian_page/ChartComponent.vue";
 import SideBar from "@/components/SideBar.vue";
 
@@ -168,12 +168,12 @@ const fetchDynamicRecipe = async (input) => {
     recipeData.value = ""; // 每次接收前先清空
 
     while (!done) {
-      const { value, done: readerDone } = await reader.read();
+      const {value, done: readerDone} = await reader.read();
       done = readerDone;
 
       if (value) {
         // 解码数据块并按行分割
-        const chunk = decoder.decode(value, { stream: true });
+        const chunk = decoder.decode(value, {stream: true});
         const lines = chunk.split("\n");
 
         // 逐行解析并处理
@@ -287,16 +287,48 @@ onBeforeMount(() => {
   store.isOpenValue ? (marginLeftValue.value = 200) : (marginLeftValue.value = 69);
 });
 
-watch(
-    () => store.isOpenValue,
-    (newValue) => {
-      if (newValue === 0) {
-        marginLeftValue.value = 69;
-      } else if (newValue === 1) {
-        marginLeftValue.value = 200;
-      }
+watch(() => store.isOpenValue, (newValue) => {
+  if (newValue === 0) {
+    decreaseMargin();
+  } else if (newValue === 1) {
+    increaseMargin();
+  }
+});
+
+// 渐渐减小 margin-left 的方法
+const decreaseMargin = () => {
+  let interval = setInterval(() => {
+    if (marginLeftValue.value > 69) { // 最小的 margin-left 值
+      marginLeftValue.value -= 10;
+    } else {
+      clearInterval(interval);
     }
-);
+  }, 20); // 每 30 毫秒调整10
+};
+
+// 渐渐增加 margin-left 的方法
+const increaseMargin = () => {
+  let interval = setInterval(() => {
+    if (marginLeftValue.value < 200) { // 最大的 margin-left 值
+      marginLeftValue.value += 20;
+    } else {
+      clearInterval(interval);
+    }
+  }, 20); // 每 30 毫秒调整10
+};
+
+import {useRouter} from 'vue-router'
+
+const router = useRouter();
+
+onBeforeMount(() => {
+  if (!store.isPlayed) redirectToExample()
+});
+
+const redirectToExample = () => {
+  store.setisPlayed(true)
+  router.push({name: 'DietitianIntro'});
+};
 </script>
 
 
@@ -527,6 +559,7 @@ button:active {
   .recipe-table {
     width: 100%;
   }
+
   .recipe-table th, .recipe-table td {
     padding: 10px;
     font-size: 12px;
