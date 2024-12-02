@@ -37,7 +37,8 @@
 <script setup lang="ts">
 import { ref, watch, defineProps } from 'vue';
 import hljs from 'highlight.js'; // 引入 highlight.js
-import 'highlight.js/styles/monokai.css'; // 更清晰的 Monokai 样式
+import 'highlight.js/styles/monokai.css';
+import {ElMessage} from "element-plus"; // 更清晰的 Monokai 样式
 
 // 高亮后的 HTML 内容
 const highlightedCode = ref('');
@@ -75,7 +76,11 @@ watch(() => props.code, updateCode, { immediate: true },);
 // 复制代码的功能
 const copyCode = () => {
   navigator.clipboard.writeText(props.code).then(() => {
-    alert('Code copied to clipboard!');
+    ElMessage({
+      showClose: true,
+      message: 'Code copied to clipboard!',
+      type: 'success',
+    });
   });
 };
 
@@ -135,7 +140,7 @@ const downloadCode = () => {
 .line-numbers {
   background-color: #3e444f; /* 行号背景色 */
   color: #999999; /* 行号颜色 */
-  padding: 2px 10px;
+  padding: 40px 10px;
   border-radius: 8px 0 0 8px;
   text-align: right;
   user-select: none;
@@ -144,7 +149,7 @@ const downloadCode = () => {
 
 .line-number {
   display: block;
-  line-height: 1.6;
+  line-height: 2.05;
   font-size: 14px;
 }
 

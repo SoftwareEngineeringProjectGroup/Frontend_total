@@ -5,7 +5,7 @@
         <img :src="form.avatar" class="avatar" alt="no"/>
       </div>
       <div v-else class="avatar-placeholder">
-        <span>上传头像</span>
+        <span>Upload</span>
       </div>
     </div>
 
@@ -23,35 +23,35 @@
              size="large">
 
       <!-- 性别 -->
-      <el-form-item label="性别">
+      <el-form-item label="Gender">
         <el-radio-group v-model="form.gender">
-          <el-radio :value="'male'">男</el-radio>
-          <el-radio :value="'female'">女</el-radio>
-          <el-radio :value="'other'">其他</el-radio>
+          <el-radio :value="'male'">male</el-radio>
+          <el-radio :value="'female'">female</el-radio>
+          <el-radio :value="'other'">other</el-radio>
         </el-radio-group>
       </el-form-item>
 
       <!-- 个人 Prompt -->
-      <el-form-item label="个人 Prompt" style="font-size: 20px" size="large">
+      <el-form-item label="Personal prompt" style="font-size: 20px" size="large">
         <el-input
             v-model="form.prompt"
             type="textarea"
-            placeholder="请输入您的个人提示语"
+            placeholder="Please enter the prompt"
 
         ></el-input>
       </el-form-item>
 
       <!-- 特殊 API -->
-      <el-form-item label="特殊 AP">
-        <el-input v-model="form.apiUrl" placeholder="请输入 AP 地址"></el-input>
+      <el-form-item label="Extend">
+        <el-input v-model="form.apiUrl" placeholder="Please enter the URL"></el-input>
       </el-form-item>
 
       <!-- 本地/联网 开关 -->
-      <el-form-item label="联网">
+      <el-form-item label="Mode">
         <el-switch
-            v-model="form.isOnline"
-            active-text="联网"
-            inactive-text="本地"
+            v-model="form.isShow"
+            active-text="demo"
+            inactive-text="local"
             active-color="#13ce66"
             inactive-color="#ff4949"
         ></el-switch>
@@ -59,14 +59,14 @@
 
     </el-form>
 
-    <el-button type="success" @click="handleButton" class="action-btn">
-      {{ isEditing ? '保存设置' : '编辑' }}
+    <el-button :type="buttonType" @click="handleButton" class="action-btn">
+      {{ isEditing ? 'Save' : 'Edit' }}
     </el-button>
   </div>
 </template>
 
 <script setup>
-import {ref} from 'vue';
+import {onBeforeMount, ref} from 'vue';
 import {
   ElForm,
   ElFormItem,
@@ -76,14 +76,28 @@ import {
   ElRadioGroup,
   ElRadio,
 } from 'element-plus';
+import {useStateStore} from "@/stores/stateStore";
+
+const buttonType = ref("")
 
 const form = ref({
   avatar: '',
   gender: 'male',
-  prompt: '鸡你太美',
-  isOnline: true,
-  apiUrl: 'app',
+  prompt: '',
+  isShow: true,
+  apiUrl: '',
 });
+
+//初始化表格
+const store = useStateStore()
+onBeforeMount(() => {
+  form.value.avatar = store.userImagePath;
+  form.value.gender = store.gender;
+  form.value.prompt = store.personalPrompt;
+  if (store.baseUrl !== "http://10.252.130.135:8000" && store.baseUrl !== "http://127.0.0.1:8000") form.value.apiUrl = store.baseUrl;
+  form.value.isShow = store.isShow;
+});
+
 
 const isEditing = ref(false);
 
@@ -105,11 +119,22 @@ const handleAvatarChange = (event) => {
 
 const handleEdit = () => {
   isEditing.value = true;
+  buttonType.value = "success"
 };
 
 const handleSave = () => {
   console.log('保存设置:', form.value);
+  store.setuserImagePath(form.value.avatar);
+  store.setGender(form.value.gender)
+  store.setPersonalPrompt(form.value.prompt)
+
+  if (form.value.isShow) store.setbaseUrl("http://10.252.130.135:8000")
+  else store.setbaseUrl("http://127.0.0.1:8000")
+
+  if (form.value.apiUrl !== "") store.setbaseUrl(form.value.apiUrl);
+  store.setIsShow(form.value.isShow)
   isEditing.value = false;
+  buttonType.value = ""
 };
 
 const handleButton = () => {
@@ -125,14 +150,14 @@ const handleButton = () => {
 
   display: flex;
   flex-direction: column; /* 竖直排列 */
-  justify-content: center; /* 垂直居中 */
+  justify-content: flex-start; /* 向上对齐 */
   align-items: center; /* 水平居中 */
-  padding: 10px; /* 加入一些内边距，防止内容靠边显示 */
+  padding: 20px; /* 增加内边距，避免内容与顶部过于贴合 */
 }
 
 .settings-form {
   width: 480px;
-  margin: 0 auto;
+  margin-top: 20px; /* 添加顶部外边距 */
   background-color: #fff;
   padding: 30px;
   border-radius: 12px;
@@ -150,7 +175,8 @@ const handleButton = () => {
   cursor: pointer;
   position: relative;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  margin-top: 40px;
 }
 
 .avatar-container, .avatar-placeholder {
@@ -200,8 +226,8 @@ const handleButton = () => {
   font-size: 18px; /* 增加按钮字体大小 */
   transition: background-color 0.3s ease;
   margin-top: 10px;
+  height: 40px;
 }
-
 
 .el-button:focus {
   outline: none;
@@ -224,4 +250,5 @@ h2 {
 .avatar-input {
   display: none;
 }
+
 </style>
