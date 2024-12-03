@@ -77,7 +77,8 @@ const uploadMessageToOllama = async (message) => {
   if (userMessage.value.includes(delimiter)) {
     const extractedMessage = userMessage.value.split(delimiter)[0];  // 获取分隔符之前的部分
     userMessage.value = extractedMessage.trim();  // 去掉前后空格
-    userMessage.value = "***[File] is uploaded***" + userMessage.value;
+    userMessage.value = "***[File is uploaded]***   " +
+        "" + userMessage.value;
   }
 
   console.log("提取后的 userMessage:", userMessage.value);

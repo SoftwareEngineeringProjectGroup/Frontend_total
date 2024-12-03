@@ -69,7 +69,6 @@ watch(
     () => props.message,
     (newMessage) => {
       if (newMessage) {
-        console.log("123131231");
         addMessage(newMessage, true, true); // 用户消息
       }
     },
