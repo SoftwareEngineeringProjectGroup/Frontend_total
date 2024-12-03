@@ -121,8 +121,6 @@ const uploadContent = async () => {
       // 2. 上传输入内容给initialmode，在chatbox弹出用户输入
       emit("uploadMessage", inputValue.value.trim()+"and the code is this: "+selectedFileContent.value);
 
-      // 3. 调用ollamaapi，左上方出现ai聊天框
-
       // 最后输入框清零
       inputValue.value = '';
       containerHeight.value = 92;

@@ -62,6 +62,7 @@ const updateMessage = (newText) => {
   }
   // 添加新的流消息
   addMessage(newText, false, true);
+  console.log("NewText+" + newText);
 };
 
 // 监听父组件传递的 message 属性变化
@@ -82,6 +83,7 @@ watch(
       if (newMsg) {
         // 更新流内容
         currentResponse.value += newMsg;
+        console.log("currentResponse.value" + currentResponse.value)
 
         // 判断是否是第一次更新流消息
         if (isFirstMsg.value) {

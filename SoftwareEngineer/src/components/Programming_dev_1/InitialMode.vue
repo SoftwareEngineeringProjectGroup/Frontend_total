@@ -70,15 +70,14 @@ const uploadMessageToOllama = async (message) => {
   console.log("uploadMessage的值是:", uploadMessage.value);
   userMessage.value = uploadMessage.value;
 
-// 查找 "and the code is this: " 的位置
+  // 查找 "and the code is this: " 的位置
   const delimiter = "and the code is this: ";
 
-// 如果 userMessage 中存在 "and the code is this: "，就提取前面的部分
+  // 如果 userMessage 中存在 "and the code is this: "，就提取前面的部分
   if (userMessage.value.includes(delimiter)) {
     const extractedMessage = userMessage.value.split(delimiter)[0];  // 获取分隔符之前的部分
     userMessage.value = extractedMessage.trim();  // 去掉前后空格
-    userMessage.value = "***[File is uploaded]***   " +
-        "" + userMessage.value;
+    userMessage.value = "***[File is uploaded]***   " + userMessage.value;
   }
 
   console.log("提取后的 userMessage:", userMessage.value);
@@ -97,7 +96,6 @@ const uploadMessageToOllama = async (message) => {
       },
       body: JSON.stringify(requestData),
     });
-    userMessage.value = '';
     if (!response.ok) {
       throw new Error(`Error: ${response.status}`);
     }
@@ -121,7 +119,14 @@ const uploadMessageToOllama = async (message) => {
           const jsonChunks = chunk.split('\n').filter(line => line.trim() !== ''); // 过滤掉空行
           jsonChunks.forEach(jsonChunk => {
             try {
-              const parsedChunk = JSON.parse(jsonChunk);
+              let parsedChunk;
+              try {
+                parsedChunk = JSON.parse(jsonChunk);
+              } catch (error){
+                return;
+              }
+
+              console.log("Received chunk:", chunk);
               if (parsedChunk.response) {
                 accumulatedResponse.value += parsedChunk.response; // 拼接响应内容
                 // 处理并提取代码块
@@ -150,6 +155,8 @@ const uploadMessageToOllama = async (message) => {
               }
             } catch (error) {
               console.error('Error parsing JSON chunk:', error);
+              // 跳过这一条无效的 jsonChunk
+              return;  // 跳过当前无效的 jsonChunk
             }
           });
         }
@@ -163,8 +170,8 @@ const uploadMessageToOllama = async (message) => {
       } else if (longestCode) {
         responseMessage.value = accumulatedResponse.value.replace(longestCode, '').trim();
       }
-      // responseMessage.value = accumulatedResponse.value.replace("```", '').trim();
       console.log('所有内容已接收，最终的 responseMessage:', responseMessage.value);
+      userMessage.value = '';
     }
   } catch (error) {
     // 错误处理
@@ -172,6 +179,7 @@ const uploadMessageToOllama = async (message) => {
     alert('上传失败，请稍后重试！');
   }
 };
+
 
 
 
