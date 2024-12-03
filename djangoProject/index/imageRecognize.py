@@ -88,7 +88,6 @@ def get_car(base,tip=True):
     """ 调用汽车识别 """
     options = {}
     options["top_num"] = 1
-    print(binary_data)
     if tip:
         result = client.carDetect(binary_data, options)
     else:
@@ -104,7 +103,7 @@ def get_name(base, prompt):
     tip=True
     if "https" in prompt:
         # 匹配 URL 的正则表达式
-        pattern = r"https://.*\.(jpg|jpeg|png|gif|bmp|webp)"
+        pattern = r"https://.*"
         # 使用 re.search 找到匹配的 URL
         base = re.search(pattern, prompt).group(0)
         tip=False
