@@ -120,6 +120,8 @@ def get_name(base, prompt):
             return get_plant(base, tip)
         elif "animal" in prompt:
             return get_animal(base, tip)
+        elif "food" in prompt:
+            return get_food(base, tip)
         else:
             return "Kobe"
     except Exception as e:
@@ -187,4 +189,35 @@ def get_animal(base, tip=True):
     # print("log:", b - a)
     # print("get", c - b)
     print("animal: ", result["result"][0]["name"])
+    return result["result"][0]["name"]
+
+
+def get_food(base, tip=True):
+    # 设置App ID、API Key、Secret Key
+    APP_ID = '116491847'
+    API_KEY = 'jpc9DXCrVhNYnMwYInFfBOpq'
+    SECRET_KEY = 'KQjLTdmVA7ZxSNvY1LaUzuytAkArve73'
+
+    # 初始化AipOcr对象
+    client = AipImageClassify(APP_ID, API_KEY, SECRET_KEY)
+
+    a = time.time()
+    if tip:
+        # 去掉前缀 `data:image/png;base64,`
+        base64_string = base.split(",")[1]
+        binary_data = base64.b64decode(base64_string)
+    else:
+        binary_data = base
+    b = time.time()
+    """ 调用食品识别 """
+    options = {}
+    options["top_num"] = 1
+    if tip:
+        result = client.dishDetect(binary_data, options)
+    else:
+        pass
+    c = time.time()
+    # print("log:", b - a)
+    # print("get", c - b)
+    print("Food:", result["result"][0]["name"])
     return result["result"][0]["name"]

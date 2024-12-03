@@ -66,6 +66,7 @@
 
         <!-- 图片识别页面 -->
         <div v-if="currentView === 'photo-recognition'" class="photo-recognition-background">
+          <foodRecognize/>
         </div>
       </div>
     </main>
@@ -78,6 +79,7 @@ import { useStateStore } from '@/stores/stateStore';
 import { ElMessage } from "element-plus";
 import ChartComponent from "@/components/dietitian_page/ChartComponent.vue";
 import SideBar from "@/components/SideBar.vue";
+import foodRecognize from "@/components/dietitian_page/foodRecognize.vue"
 
 const currentView = ref('main');
 const chartType = ref(null);
