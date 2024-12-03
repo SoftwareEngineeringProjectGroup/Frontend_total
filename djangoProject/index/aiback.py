@@ -16,7 +16,7 @@ def proxy_generate_request(request):
         # 向localhost:11434/api/generate发送请求
         url = "http://localhost:11434/api/generate"
         headers = {'Content-Type': 'application/json'}
-        print("ai-back: ",data)
+        print("ai-back: ", data)
 
         # 发送POST请求到外部API，使用stream=True来处理流式返回
         response = requests.post(url, headers=headers, json=data, stream=True)
