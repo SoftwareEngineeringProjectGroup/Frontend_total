@@ -30,11 +30,11 @@ import 'highlight.js/styles/github.css';
 import hljs from "highlight.js";
 import MarkdownIt from "markdown-it";
 
-
 const props = defineProps({
   message: String, // 用户消息
   msg: String,     // 流式返回的消息内容
   isComplete: Boolean, // 是否已完成返回
+  finalmessage: String, // 最终消息
 });
 
 // 用于存储当前正在拼接的流式返回的内容
@@ -48,22 +48,29 @@ const messages = ref([
 ]);
 
 // 动态添加信息的函数
-const addMessage = (text, isUser = false, isMarkdown = false) => {
+// 动态添加信息的函数
+const addMessage = (text: any, isUser = false, isMarkdown = false) => {
+  if (typeof text !== 'string') {
+    console.error("Invalid message content:", text);
+    return; // 如果消息内容无效，则不添加
+  }
   messages.value.push({ text, isUser, isMarkdown });
 };
 
 // 删除上一条消息并替换
-const updateMessage = (newText) => {
-  // 只删除上一条流式消息（系统消息）
+const updateMessage = (newText: any) => {
+  if (typeof newText !== 'string') {
+    console.error("Invalid message content:", newText);
+    return; // 如果新的消息内容无效，则不进行替换
+  }
+
   const lastMessage = messages.value[messages.value.length - 1];
   if (!lastMessage.isUser) {
-    // 只有当最后一条消息是系统消息时，才进行替换
-    messages.value.splice(messages.value.length - 1, 1);
+    messages.value.splice(messages.value.length - 1, 1); // 只有在最后一条是系统消息时才删除
   }
-  // 添加新的流消息
   addMessage(newText, false, true);
-  console.log("NewText + " + newText);
 };
+
 
 // 监听父组件传递的 message 属性变化
 watch(
@@ -80,46 +87,40 @@ watch(
 watch(
     () => props.msg,
     (newMsg) => {
-      if (newMsg) {
-        // 更新流内容
+      if (newMsg && typeof newMsg === 'string') {
+        // 只有当 newMsg 是有效的字符串时才处理
         currentResponse.value += newMsg;
         console.log("currentResponse.value: " + currentResponse.value);
 
-        // 判断是否是第一次更新流消息
         if (isFirstMsg.value) {
-          // 如果是第一次，不删除上面的消息，直接添加
+          // 如果是第一次更新，直接添加流式消息
           addMessage(newMsg, false, true);
-          isFirstMsg.value = false; // 之后的更新将删除上一条消息
+          isFirstMsg.value = false;
         } else {
-          // 如果不是第一次，删除上一条消息并更新
+          // 不是第一次，删除上一条并更新
           updateMessage(currentResponse.value);
         }
 
         // 判断流数据是否包含换行符等，判断是否可以拼接完整
         if (newMsg.includes('\n')) {
-          // 如果包含换行符，判断是否是代码片段或解释内容
           if (currentResponse.value.trim().startsWith('```')) {
-            // 判断为代码片段，添加为消息
             updateMessage(currentResponse.value);
           } else {
-            // 继续拼接解释内容
-            currentExplanation.value += newMsg; // 拼接新内容到解释部分
+            currentExplanation.value += newMsg;
           }
-
-          // 清空当前流响应，准备下一次拼接
-          currentResponse.value = '';
+          currentResponse.value = ''; // 清空当前流响应，准备下一次拼接
         }
 
-        // 当流传输完成时，添加完整消息
         if (props.isComplete) {
-          // 如果当前有解释内容，进行最后一次更新
+          // 如果已经完成流式数据，更新最终消息
           if (currentExplanation.value) {
-            updateMessage(currentExplanation.value);
-            currentExplanation.value = ''; // 清空当前的解释内容
+            updateMessage(props.finalmessage);
+            currentExplanation.value = ''; // 清空当前解释内容
           }
-          // 清空临时变量，表示已经完成最后一次更新
-          isFirstMsg.value = true;
+          isFirstMsg.value = true; // 重置状态
         }
+      } else {
+        console.warn("Received invalid msg data:", newMsg);
       }
     },
     { immediate: true }
@@ -139,9 +140,15 @@ const md = new MarkdownIt({
   },
 });
 
-const renderMarkdown = (text: string) => {
+const renderMarkdown = (text: any) => {
+  // 确保传入的参数是字符串
+  if (typeof text !== 'string') {
+    console.error("Invalid input for Markdown rendering:", text);
+    return '';  // 返回空字符串，防止渲染错误
+  }
   return md.render(text);
 };
+
 
 // 滚动到最新消息
 const scrollToBottom = () => {

@@ -12,7 +12,7 @@
           overflowY: 'auto'
         }"
     >
-      <chatBox :message="userMessage" :msg="responseMessage" :isComplete="isComplete"/>
+      <chatBox :message="userMessage" :msg="responseMessage" :isComplete="isComplete" :is_complete="finalmessage"/>
     </div>
     <div
         class="content"
@@ -61,7 +61,7 @@ onBeforeMount(() => {
 let userMessage = ref('')
 let responseMessage = ref('')
 let isComplete = ref(false);
-
+let finalmessage = ref('');
 let uploadMessage = ref("");
 
 // 定义上传消息到 Ollama 的函数
@@ -171,6 +171,7 @@ const uploadMessageToOllama = async (message) => {
         responseMessage.value = accumulatedResponse.value.replace(longestCode, '').trim();
       }
       console.log('所有内容已接收，最终的 responseMessage:', responseMessage.value);
+      finalmessage.value = responseMessage.value;
       userMessage.value = '';
     }
   } catch (error) {
@@ -179,8 +180,6 @@ const uploadMessageToOllama = async (message) => {
     alert('上传失败，请稍后重试！');
   }
 };
-
-
 
 
 // 提取 Markdown 格式中的代码块及其语言
