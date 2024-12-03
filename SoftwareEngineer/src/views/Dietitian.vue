@@ -22,10 +22,6 @@
           />
         </div>
 
-        <div class="response-container" v-if="aiResponse">
-          <p>AI Reply: {{ aiResponse }}</p>
-        </div>
-
         <div class="button-container">
           <div class="icon-button" @click="showRecipe">📋</div>
           <div class="icon-button" @click="showVisualization">📊</div>
@@ -38,7 +34,6 @@
 
         <!-- 食谱页面 -->
         <div v-if="currentView === 'recipe'" class="recipe-background">
-
           <div v-if="tableVisible">
             <table class="recipe-table">
               <thead>
@@ -50,7 +45,7 @@
               </tr>
               </thead>
               <tbody>
-              <tr v-for="(meals, day) in recipes" :key="day">
+              <tr v-for="(meals, day) in recipes" :key="day" @click="updateChartWithRandomFood">
                 <td class="interactive-cell">{{ day }}</td>
                 <td class="interactive-cell">{{ meals.breakfast || 'Loading...' }}</td>
                 <td class="interactive-cell">{{ meals.lunch || 'Loading...' }}</td>
@@ -58,21 +53,19 @@
               </tr>
               </tbody>
             </table>
+            <!--            <button @click="updateChartWithRandomFood">test</button>-->
           </div>
-
         </div>
 
         <!-- 可视化页面 -->
-        <div v-if="currentView === 'visualization'" class="visualization-background">
-          <!-- 直接显示饼图，不需要按钮 -->
-          <div v-if="chartType === 'pie'" class="chart">
-            <ChartComponent :type="chartType" />
+        <div v-show="currentView === 'visualization'" class="visualization-background">
+          <div v-show="chartType === 'pie'" class="chart">
+            <ChartComponent :type="chartType" ref="chartComponentRef" />
           </div>
         </div>
 
         <!-- 图片识别页面 -->
         <div v-if="currentView === 'photo-recognition'" class="photo-recognition-background">
-          <p>Photo Recognition Content...</p>
         </div>
       </div>
     </main>
@@ -80,7 +73,7 @@
 </template>
 
 <script setup>
-import { ref, onBeforeMount, watch } from 'vue';
+import { ref, onBeforeMount, watch, nextTick} from 'vue';
 import { useStateStore } from '@/stores/stateStore';
 import { ElMessage } from "element-plus";
 import ChartComponent from "@/components/dietitian_page/ChartComponent.vue";
@@ -100,6 +93,15 @@ const tableVisible = ref(false); // 控制表格是否可见，初始为不可�
 onBeforeMount(() => {
   baseURL = store.baseUrl;
 });
+
+const chartComponentRef = ref(null); // 子组件引用
+const updateChartWithRandomFood = async () => {
+  await nextTick();  // 确保 DOM 更新完成
+  console.log('chartComponentRef:', chartComponentRef.value); // 打印是否正常引用
+  if (chartComponentRef.value) {
+    chartComponentRef.value.updateChart();  // 更新饼图
+  }
+};
 
 // 正则表达式去除markdown样式和提示内容
 const cleanText = (text) => {
@@ -279,7 +281,6 @@ const handleInput = async () => {
   }
 };
 
-
 const showRecipe = () => {
   currentView.value = "recipe";
   generateRandomRecipe(); // 默认初始化食谱
@@ -329,19 +330,6 @@ const increaseMargin = () => {
       clearInterval(interval);
     }
   }, 20); // 每 30 毫秒调整10
-};
-
-import {useRouter} from 'vue-router'
-
-const router = useRouter();
-
-onBeforeMount(() => {
-  if (!store.isPlayed) redirectToExample()
-});
-
-const redirectToExample = () => {
-  store.setisPlayed(true)
-  router.push({name: 'DietitianIntro'});
 };
 </script>
 
@@ -556,6 +544,7 @@ button:active {
 
 .interactive-cell:hover {
   transform: scale(1.05);
+  color: #3875d7;
   background-color: #f0f8ff;
   box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
 }
@@ -585,7 +574,7 @@ button:active {
 }
 
 .visualization-background {
-  background: linear-gradient(135deg, #AFEEEE, #4ac1f7); /* 静态渐变背景色 */
+  background: linear-gradient(135deg, #AFEEEE, #4ac1f7);
   width: 1200px;
   height: 700px;
   display: flex;
@@ -593,20 +582,23 @@ button:active {
   justify-content: center;
   border-radius: 15px;
   margin: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* 添加柔和的阴影效果 */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
 }
 
 .photo-recognition-background {
-  background-color: #7FFFD4;
-  width: 1000px;
-  height: 400px;
+  background: linear-gradient(45deg, #FF6A00, #FFD700);
+  width: 1400px;
+  height: 700px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 15px;
   margin: auto;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
 }
 
 .features {

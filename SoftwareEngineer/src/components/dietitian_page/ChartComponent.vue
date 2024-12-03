@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { onMounted, watch, ref } from 'vue';
+import {onMounted, watch, ref, defineExpose} from 'vue';
 import * as echarts from 'echarts';
 
 const props = defineProps({
@@ -42,21 +42,41 @@ const props = defineProps({
 const chart = ref(null);
 
 const foodData = ref([
-  { name: 'Avocado', category: 'Fruit', nutrients: { Protein: 2, Fat: 15, Carbohydrates: 9, Fiber: 7, Sugars: 0.2 } },
-  { name: 'Chicken Breast', category: 'Poultry', nutrients: { Protein: 31, Fat: 3.6, Carbohydrates: 0, Fiber: 0, Sugars: 0 } },
-  { name: 'Salmon', category: 'Fish', nutrients: { Protein: 25, Fat: 14, Carbohydrates: 0, Fiber: 0, Sugars: 0 } },
-  { name: 'Spinach', category: 'Vegetable', nutrients: { Protein: 2.9, Fat: 0.4, Carbohydrates: 3.6, Fiber: 2.2, Sugars: 0.4 } },
+  {name: 'Avocado', category: 'Fruit', nutrients: {Protein: 2, Fat: 15, Carbohydrates: 9, Fiber: 7, Sugars: 0.2}},
+  {
+    name: 'Chicken Breast',
+    category: 'Poultry',
+    nutrients: {Protein: 31, Fat: 3.6, Carbohydrates: 0, Fiber: 0, Sugars: 0}
+  },
+  {name: 'Salmon', category: 'Fish', nutrients: {Protein: 25, Fat: 14, Carbohydrates: 0, Fiber: 0, Sugars: 0}},
+  {
+    name: 'Spinach',
+    category: 'Vegetable',
+    nutrients: {Protein: 2.9, Fat: 0.4, Carbohydrates: 3.6, Fiber: 2.2, Sugars: 0.4}
+  },
   {name: 'Quinoa', category: 'Grain', nutrients: {Protein: 4.1, Fat: 1.9, Carbohydrates: 21, Fiber: 2.8, Sugars: 0.9}},
   {name: 'Eggs', category: 'Dairy', nutrients: {Protein: 6, Fat: 5, Carbohydrates: 0.6, Fiber: 0, Sugars: 0.6}},
-  {name: 'Broccoli', category: 'Vegetable', nutrients: {Protein: 2.6, Fat: 0.4, Carbohydrates: 6, Fiber: 2.4, Sugars: 1.5}},
+  {
+    name: 'Broccoli',
+    category: 'Vegetable',
+    nutrients: {Protein: 2.6, Fat: 0.4, Carbohydrates: 6, Fiber: 2.4, Sugars: 1.5}
+  },
   {name: 'Beef', category: 'Meat', nutrients: {Protein: 26, Fat: 15, Carbohydrates: 0, Fiber: 0, Sugars: 0}},
   {name: 'Almonds', category: 'Nuts', nutrients: {Protein: 21, Fat: 49, Carbohydrates: 22, Fiber: 12, Sugars: 3.9}},
   {name: 'Yogurt', category: 'Dairy', nutrients: {Protein: 3.5, Fat: 4, Carbohydrates: 17, Fiber: 0, Sugars: 10.5}},
-  {name: 'Sweet Potato', category: 'Vegetable', nutrients: {Protein: 2, Fat: 0.1, Carbohydrates: 20, Fiber: 3, Sugars: 4.2}},
+  {
+    name: 'Sweet Potato',
+    category: 'Vegetable',
+    nutrients: {Protein: 2, Fat: 0.1, Carbohydrates: 20, Fiber: 3, Sugars: 4.2}
+  },
   {name: 'Greek Yogurt', category: 'Dairy', nutrients: {Protein: 10, Fat: 5, Carbohydrates: 6, Fiber: 0, Sugars: 4}},
   {name: 'Apple', category: 'Fruit', nutrients: {Protein: 0.5, Fat: 0.3, Carbohydrates: 25, Fiber: 4.4, Sugars: 19}},
   {name: 'Oats', category: 'Grain', nutrients: {Protein: 16.9, Fat: 6.9, Carbohydrates: 66, Fiber: 10.6, Sugars: 0.4}},
-  {name: 'Carrot', category: 'Vegetable', nutrients: {Protein: 0.9, Fat: 0.2, Carbohydrates: 9.6, Fiber: 2.8, Sugars: 4.7}},
+  {
+    name: 'Carrot',
+    category: 'Vegetable',
+    nutrients: {Protein: 0.9, Fat: 0.2, Carbohydrates: 9.6, Fiber: 2.8, Sugars: 4.7}
+  },
 ]);
 
 const selectedFood = ref(null);
@@ -87,11 +107,11 @@ const getPieOption = (data) => {
         type: 'pie',
         radius: ['30%', '50%'],
         data: [
-          { value: data.nutrients.Protein, name: 'Protein' },
-          { value: data.nutrients.Fat, name: 'Fat' },
-          { value: data.nutrients.Carbohydrates, name: 'Carbohydrates' },
-          { value: data.nutrients.Fiber, name: 'Fiber' },
-          { value: data.nutrients.Sugars, name: 'Sugars' },
+          {value: data.nutrients.Protein, name: 'Protein'},
+          {value: data.nutrients.Fat, name: 'Fat'},
+          {value: data.nutrients.Carbohydrates, name: 'Carbohydrates'},
+          {value: data.nutrients.Fiber, name: 'Fiber'},
+          {value: data.nutrients.Sugars, name: 'Sugars'},
         ],
         emphasis: {
           itemStyle: {
@@ -116,11 +136,50 @@ const selectFood = (food) => {
   initChart(food);
 };
 
+// 随机生成食物数据
+const generateRandomFood = () => {
+  const randomName = `Based on table, the`;  // 随机食物名称
+  const categories = ['Fruit', 'Vegetable', 'Meat', 'Poultry', 'Grain', 'Dairy', 'Nuts', 'Fish'];
+  const randomCategory = categories[Math.floor(Math.random() * categories.length)];  // 随机选择类别
+
+  // 随机生成营养成分
+  const randomNutrients = {
+    Protein: Math.floor(Math.random() * 50),
+    Fat: Math.floor(Math.random() * 30),
+    Carbohydrates: Math.floor(Math.random() * 60),
+    Fiber: Math.floor(Math.random() * 10),
+    Sugars: Math.floor(Math.random() * 30),
+  };
+
+  return {name: randomName, category: randomCategory, nutrients: randomNutrients};
+};
+
+const isRandomData = ref(false); // 是否使用随机数据
+
+// 更新饼图
+const updateChart = async () => {
+  const isRandomData = true;
+  console.log("chartComponentRef已被调用")
+  const randomFood = generateRandomFood();  // 随机生成食物数据
+  selectedFood.value = randomFood;
+  initChart(randomFood);  // 更新饼图
+  return isRandomData;
+};
+
+// 暴露给父组件的函数
+defineExpose({
+  updateChart,
+});
+
+// onMounted钩子
 onMounted(() => {
-  if (foodData.value.length > 0) {
-    selectedFood.value = foodData.value[0];
-    initChart(selectedFood.value);
+  if (updateChart()) {
+    console.log("isRandomData为True");
+    updateChart();  // 使用随机数据初始化
+  } else if (foodData.value.length > 0) {
+    selectedFood.value = foodData.value[0];  // 获取第一个食物数据
   }
+  initChart(selectedFood.value);  // 使用 selectedFood 初始化饼图
 });
 
 const foodRows = ref([]);
