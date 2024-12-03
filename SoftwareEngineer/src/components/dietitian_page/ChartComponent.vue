@@ -118,7 +118,7 @@ const selectFood = (food) => {
 
 // 随机生成食物数据
 const generateRandomFood = () => {
-  const randomName = `Food ${Math.floor(Math.random() * 1000)}`;  // 随机食物名称
+  const randomName = `Based on table, the`;  // 随机食物名称
   const categories = ['Fruit', 'Vegetable', 'Meat', 'Poultry', 'Grain', 'Dairy', 'Nuts', 'Fish'];
   const randomCategory = categories[Math.floor(Math.random() * categories.length)];  // 随机选择类别
 
@@ -134,24 +134,32 @@ const generateRandomFood = () => {
   return { name: randomName, category: randomCategory, nutrients: randomNutrients };
 };
 
+const isRandomData = ref(false); // 是否使用随机数据
+
 // 更新饼图
 const updateChart = async () => {
+  const isRandomData = true;
   console.log("chartComponentRef已被调用")
   const randomFood = generateRandomFood();  // 随机生成食物数据
   selectedFood.value = randomFood;
   initChart(randomFood);  // 更新饼图
+  return isRandomData;
 };
 
 // 暴露给父组件的函数
 defineExpose({
-  updateChart
+  updateChart,
 });
 
+// onMounted钩子
 onMounted(() => {
-  if (foodData.value.length > 0) {
-    selectedFood.value = foodData.value[0];
-    initChart(selectedFood.value);
+  if (updateChart()) {
+    console.log("isRandomData为True");
+    updateChart();  // 使用随机数据初始化
+  } else if (foodData.value.length > 0) {
+    selectedFood.value = foodData.value[0];  // 获取第一个食物数据
   }
+  initChart(selectedFood.value);  // 使用 selectedFood 初始化饼图
 });
 
 const foodRows = ref([]);
