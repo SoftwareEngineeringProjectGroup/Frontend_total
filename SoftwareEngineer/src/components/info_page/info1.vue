@@ -53,7 +53,7 @@
       <div v-if="imageUrl">
         <img :src="imageUrl" alt="上传的图片" style="max-width: 100%; height: auto;"/>
       </div>
-<!--      <button @click="showIt">url</button>-->
+      <!--      <button @click="showIt">url</button>-->
     </div>
 
   </div>
@@ -221,6 +221,7 @@ const getAnswer = async () => {
         const chunk = decoder.decode(value, {stream: true});
         // console.log("chunk",chunk);
         const lines = chunk.split("\n");
+        // let a = 0;
 
         // 逐行解析并处理
         lines.forEach((line) => {
@@ -231,6 +232,7 @@ const getAnswer = async () => {
               expandedMessage.value += parsedChunk.response;
             } catch (parseError) {
               console.warn("JSON解析失败，跳过该行: ", line);
+              // a += 1
             }
           }
         });
@@ -261,6 +263,11 @@ const getAnswer = async () => {
 const getImageAnswer = async () => {
   console.log('发送图片')
   const timeout = 20000; // 设置超时时间（以毫秒为单位，例如10秒）
+  let fileData=""
+  if (fileColor.value === "danger"){
+    fileData=imageUrl.value
+    triggerFileInput();
+  }//删除图片
 
   const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error("请求超时")), timeout)
@@ -270,7 +277,7 @@ const getImageAnswer = async () => {
   try {
 
     const response = await Promise.race([
-      fetch(baseURL+"/image/recognition", {
+      fetch(baseURL + "/image/recognition", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -278,12 +285,12 @@ const getImageAnswer = async () => {
         body: JSON.stringify({
           model: "gemma2:2b",
           prompt: personalPrompt + inputValue.value,
-          image: imageUrl.value
+          image: fileData
         }),
       }),
       timeoutPromise, // 如果 fetch 未完成，此 promise 将优先返回超时错误
     ]);
-    if (fileColor.value === "danger") triggerFileInput();//删除图片
+
 
 
     if (!response.body) {
@@ -715,6 +722,7 @@ const saveHistory = () => {
 //网络按钮的逻辑
 let internetColour = ref("info")
 const changeInternet = () => {
+  revertBall();
 
   if (internetColour.value === "info") {
     suffix = "/ai/internet/back";

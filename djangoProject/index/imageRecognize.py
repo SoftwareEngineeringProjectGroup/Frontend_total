@@ -88,7 +88,6 @@ def get_car(base,tip=True):
     """ 调用汽车识别 """
     options = {}
     options["top_num"] = 1
-    print(binary_data)
     if tip:
         result = client.carDetect(binary_data, options)
     else:
@@ -96,7 +95,7 @@ def get_car(base,tip=True):
     c = time.time()
     # print("log:", b - a)
     # print("get", c - b)
-    print(result["result"][0]["name"])
+    print("car: ",result["result"][0]["name"])
     return result["result"][0]["name"]
 
 
@@ -104,7 +103,7 @@ def get_name(base, prompt):
     tip=True
     if "https" in prompt:
         # 匹配 URL 的正则表达式
-        pattern = r"https://.*\.(jpg|jpeg|png|gif|bmp|webp)"
+        pattern = r"https://.*"
         # 使用 re.search 找到匹配的 URL
         base = re.search(pattern, prompt).group(0)
         tip=False
@@ -152,7 +151,7 @@ def get_plant(base,tip=True):
     c = time.time()
     # print("log:", b - a)
     # print("get", c - b)
-    print(result["result"][0]["name"])
+    print("plant",result["result"][0]["name"])
     return result["result"][0]["name"]
 
 
@@ -183,5 +182,5 @@ def get_animal(base,tip=True):
     c = time.time()
     # print("log:", b - a)
     # print("get", c - b)
-    print(result["result"][0]["name"])
+    print("animal: ",result["result"][0]["name"])
     return result["result"][0]["name"]
