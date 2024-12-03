@@ -83,7 +83,7 @@ let audioChunks: Blob[] = [];
 let baseURL='';
 onBeforeMount(() => {
   if(stateStore.baseUrl=="0"){
-    ErrorPop("Please set an IPv4 address",5000)
+    ErrorPop("Please set an url",5000)
   }
   baseURL=stateStore.baseUrl;
 

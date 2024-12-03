@@ -266,7 +266,7 @@ const settingInfo = ref("## 1. Set Your User Profile\n" +
   -webkit-background-clip: text;
   color: transparent;
   text-shadow: 0px 0px 15px rgba(255, 255, 255, 0.8), 0px 0px 30px rgba(255, 255, 255, 0.6), 0px 0px 45px rgba(255, 255, 255, 0.4);
-  animation: glow 3s ease-in-out infinite alternate, moveGlow 3s linear infinite;
+  animation: glow 5s ease-in-out infinite alternate, moveGlow 15s linear infinite;
 }
 
 /* 光晕闪动动画 */

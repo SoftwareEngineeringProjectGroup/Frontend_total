@@ -8,9 +8,12 @@ import re
 from translate import Translator
 from fish_audio_sdk import Session, TTSRequest, ASRRequest
 from io import BytesIO
+from aip import AipImageClassify
+import base64
 from .aiback import proxy_generate_request
 from .voices import generate_audio, speechToText
 from .internets import connect_internet
+from .imageRecognize import recognition_image
 
 
 # Create your views here.
@@ -47,6 +50,14 @@ def generate_id_item(id, dic):
             "title": dic["title"],
             "time": dic["time"]}
     return dic0
+
+#反馈
+def feed_back(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        print("feedback:",data)
+        return JsonResponse({"status": 200})
+
 
 
 # def proxy_generate_request(request):
@@ -85,6 +96,7 @@ def generate_id_item(id, dic):
 #         return streaming_response
 #
 #     return JsonResponse({"error": "只能POST请求"}, status=405)
+
 
 
 

@@ -28,7 +28,8 @@
     <div class="input-container">
 
       <!--      网络按钮-->
-      <el-button type="primary" @click="sendToModel" :icon="InterIcon" size="large" style="font-size: 24px;" circle>
+      <el-button :type="internetColour" @click="changeInternet" :icon="InterIcon" size="large" style="font-size: 24px;"
+                 circle>
       </el-button>
 
       <input class="message-input" v-model="inputValue" placeholder="Please enter here" ref="messageInput"
@@ -52,6 +53,7 @@
       <div v-if="imageUrl">
         <img :src="imageUrl" alt="上传的图片" style="max-width: 100%; height: auto;"/>
       </div>
+<!--      <button @click="showIt">url</button>-->
     </div>
 
   </div>
@@ -69,12 +71,17 @@ import InterIcon from '@/assets/informationPage/internet-yes.svg'
 import Close from '@/assets/informationPage/close.svg'
 import {useStateStore} from "@/stores/stateStore.ts";
 
+const showIt = () => {
+  console.log(imageUrl.value);
+
+}
+
 
 //模型回复的加载标记
 let isAILoading = ref(false)
 
 //输入信息
-let inputValue = ref("")
+let inputValue = ref<string>("")
 //信息列表
 //过去的询问列表
 let asks = ref([{
@@ -155,7 +162,11 @@ const sendToModel = () => {
     "user": {text: inputValue.value, internet: true, isPhoto: false, photoUrl: ''},
     "ai": {text: ""}
   });
-  getAnswer();
+  console.log(typeof inputValue.value)
+  // console.log(fileColor.value === "danger"||'http' in inputValue.value)
+  //切换
+  if (fileColor.value === "danger" || inputValue.value.includes("http")) getImageAnswer()
+  else getAnswer();
   const temp_text = inputValue.value;
   inputValue.value = '';
   sendCartoon(temp_text);
@@ -165,7 +176,7 @@ const sendToModel = () => {
 
 //ai返回
 const getAnswer = async () => {
-  const timeout = 10000; // 设置超时时间（以毫秒为单位，例如10秒）
+  const timeout = 20000; // 设置超时时间（以毫秒为单位，例如10秒）
 
   const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error("请求超时")), timeout)
@@ -175,14 +186,14 @@ const getAnswer = async () => {
   try {
 
     const response = await Promise.race([
-      fetch(baseURL + "/ai/back", {
+      fetch(baseURL + suffix, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           model: "gemma2:2b",
-          prompt: inputValue.value,
+          prompt: personalPrompt + inputValue.value,
         }),
       }),
       timeoutPromise, // 如果 fetch 未完成，此 promise 将优先返回超时错误
@@ -229,7 +240,7 @@ const getAnswer = async () => {
     await expandBall();
 
 
-    console.log("流结束");
+    // console.log("流结束");
   } catch (error) {
     console.error("错误: ", error);
     asks.value.pop(); //直接删去最后一个
@@ -244,6 +255,94 @@ const getAnswer = async () => {
   }
   saveHistory();
 };
+
+
+//图像测试
+const getImageAnswer = async () => {
+  console.log('发送图片')
+  const timeout = 20000; // 设置超时时间（以毫秒为单位，例如10秒）
+
+  const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("请求超时")), timeout)
+  );
+  expandedMessage.value = ""//确保清空
+
+  try {
+
+    const response = await Promise.race([
+      fetch(baseURL+"/image/recognition", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gemma2:2b",
+          prompt: personalPrompt + inputValue.value,
+          image: imageUrl.value
+        }),
+      }),
+      timeoutPromise, // 如果 fetch 未完成，此 promise 将优先返回超时错误
+    ]);
+    if (fileColor.value === "danger") triggerFileInput();//删除图片
+
+
+    if (!response.body) {
+      throw new Error("流式返回没有body");
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+    let done = false;
+
+    isAILoading.value = false; // 解除加载
+
+    tempChangeBallColor();
+
+
+    while (!done) {
+      const {value, done: readerDone} = await reader.read();
+      done = readerDone;
+
+      if (value) {
+        // 解码数据块并按行分割
+        const chunk = decoder.decode(value, {stream: true});
+        // console.log("chunk",chunk);
+        const lines = chunk.split("\n");
+
+        // 逐行解析并处理
+        lines.forEach((line) => {
+          if (line.trim()) { // 忽略空行
+            try {
+              const parsedChunk = JSON.parse(line);
+              asks.value[asks.value.length - 1].ai.text += parsedChunk.response;
+              expandedMessage.value += parsedChunk.response;
+            } catch (parseError) {
+              console.warn("JSON解析失败，跳过该行: ", line);
+            }
+          }
+        });
+      }
+    }
+    stopScaling();//停止抖动
+    await expandBall();
+
+
+    // console.log("流结束");
+  } catch (error) {
+    console.error("错误: ", error);
+    asks.value.pop(); //直接删去最后一个
+    await revertBall();
+    if (error.message === "请求超时") {
+      ErrorPop("Timeout");
+      stopScaling();
+    } else {
+      ErrorPop("404 Warning");
+      stopScaling();
+    }
+  }
+  saveHistory();
+};
+
 
 //错误弹窗
 const ErrorPop = (info: string, time = 3000) => {
@@ -374,6 +473,7 @@ const expandBall = async () => {
   if (expandedMessageDiv.value) {
     // 使用 expandedMessageDiv 获取实际渲染后的高度
     const calculatedHeight = expandedMessageDiv.value.getBoundingClientRect().height;
+    // console.log("expand:",calculatedHeight)
 
     // 扩展悬浮球的高度以适应内容
     gsap.to(ball.value, {
@@ -389,9 +489,11 @@ const expandBall = async () => {
 
 // 监听 expandedMessage 的变化
 watch(expandedMessage, () => {
+  // console.log(mode.value);
   if (expandedMessageTip) {
-    updateBallHeight(); // 当内容更新时，更新悬浮球的高度
+    expandBall();
   }
+
 });
 
 // 动态更新悬浮球的高度以适应内容
@@ -401,7 +503,8 @@ const updateBallHeight = async () => {
   if (expandedMessageDiv.value) {
     // 创建一个临时的容器用于计算内容的高度
     const tempDiv = document.createElement('div');
-    tempDiv.style.position = 'absolute';
+    tempDiv.classList.add('markdown-body');
+    // tempDiv.style.position = 'absolute';
     tempDiv.style.width = '200px'; // 使用与悬浮球相同的固定宽度
     tempDiv.style.visibility = 'hidden';
     tempDiv.style.pointerEvents = 'none';
@@ -418,8 +521,9 @@ const updateBallHeight = async () => {
 
     // 扩展悬浮球的高度以适应内容
     if (calculatedHeight <= 10) calculatedHeight = 10;
+    console.log("update:", calculatedHeight);
     gsap.to(ball.value, {
-      width: '500px',
+      width: '700px',
       height: calculatedHeight + 'px', // 加一些 padding 以防止内容紧贴边缘
       borderRadius: '20px',
       backgroundColor: '#FFFFFF',
@@ -481,14 +585,19 @@ onMounted(() => {
 //获取base url
 const stateStore = useStateStore();
 let baseURL = ""
+let personalPrompt = ""
+let suffix = "/ai/back" // 请求后缀
 onBeforeMount(() => {
   baseURL = stateStore.baseUrl; //先设置成默认url
   //初始化消息记录
   if (stateStore.infoHistory.length !== 0) asks.value = stateStore.infoHistory;
+  personalPrompt = stateStore.personalPrompt;
+
 });
 
 // 临时改变悬浮球颜色
 const tempChangeBallColor = () => {
+  // console.log(mode.value)
   gsap.to(ball.value, {
     background: 'radial-gradient(circle at center, rgba(173, 216, 230, 0.8), rgba(70, 130, 180, 0.8)), radial-gradient(circle at center, #87CEEB, #4682B4, #1E90FF)', // 设置一个蓝色渐变颜色
     duration: 0.5,
@@ -497,6 +606,9 @@ const tempChangeBallColor = () => {
       applyPetalAnimation(1); // 重新应用花瓣动画
     }
   });
+  setTimeout(() => {
+    if (suffix === "/ai/internet/back") expandedMessageTip = true
+  }, 6000);
 
 };
 
@@ -600,6 +712,33 @@ const saveHistory = () => {
   stateStore.setInfoHistory(asks.value);
 }
 
+//网络按钮的逻辑
+let internetColour = ref("info")
+const changeInternet = () => {
+
+  if (internetColour.value === "info") {
+    suffix = "/ai/internet/back";
+    internetColour.value = "primary"
+    warningPop("Online queries will consume more time, approximately 6-10 seconds", 5000);
+  } else {
+    suffix = "/ai/back"
+    internetColour.value = "info"
+  }
+}
+
+//警报弹窗
+const warningPop = (info: string, time = 3000) => {
+  ElMessage({
+    showClose: true,
+    message: info,
+    type: 'warning',
+    duration: time
+  })
+}
+
+//即使显示模式f代表非即使，t代表即使
+// let mode=ref(false);
+
 </script>
 <style scoped>
 .chat-page {
@@ -608,7 +747,7 @@ const saveHistory = () => {
   align-items: center;
   justify-content: flex-start; /* 调整为 flex-start，使内容向上对齐 */
   height: 100vh;
-  padding: 180px 20px 20px; /* 减小顶部的 padding，使内容向上移动 */
+  padding: 100px 20px 20px; /* 减小顶部的 padding，使内容向上移动 */
 }
 
 /* 其他样式保持不变 */
@@ -625,16 +764,40 @@ const saveHistory = () => {
   position: relative;
   overflow-y: scroll;
   scrollbar-width: none; /* 隐藏滚动条 */
+  max-height: 480px;
 }
 
 .past-info {
   display: flex;
-  flex-wrap: wrap;
   max-width: 80%;
-  margin-top: 10px;
   gap: 10px;
   overflow-y: hidden;
   max-height: 200px;
+}
+
+/* 定制滚动条样式 */
+.past-info::-webkit-scrollbar {
+  height: 8px; /* 垂直滚动条的高度（左右滚动条高度为 8px） */
+  width: 8px; /* 水平滚动条的宽度 */
+}
+
+.past-info::-webkit-scrollbar-track {
+  background-color: #f1f1f1; /* 滚动条轨道的背景颜色 */
+  border-radius: 10px; /* 轨道的圆角 */
+}
+
+.past-info::-webkit-scrollbar-thumb {
+  background-color: #888; /* 滚动条的颜色 */
+  border-radius: 10px; /* 滚动条的圆角 */
+  transition: background-color 0.3s ease;
+}
+
+.past-info::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* 滚动条的悬停颜色 */
+}
+
+.past-info::-webkit-scrollbar-corner {
+  background-color: transparent; /* 右下角交叉部分的背景 */
 }
 
 /* 输入框容器 */
