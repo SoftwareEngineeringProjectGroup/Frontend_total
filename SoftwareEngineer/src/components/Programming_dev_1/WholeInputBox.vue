@@ -46,7 +46,7 @@ const inputValue = ref(''); // 存储输入框的值
 const containerHeight = ref(92); // 父容器初始高度
 
 let isFirstTime = 0;
-const emit = defineEmits(['firstUpload', 'uploadMessage']);
+const emit = defineEmits(['firstUpload', 'uploadMessage', 'uploadFile']);
 
 // 文件信息
 const selectedFile = ref<File | null>(null);
@@ -65,59 +65,75 @@ onBeforeMount(() => {
 const updateHeight = () => {
   nextTick(() => {
     const inputBox = document.querySelector('.inputBox textarea');
-    if (inputBox) {
+    if (inputBox && !selectedFile.value) {
       containerHeight.value = inputBox.scrollHeight + 62; // 根据输入框内容动态调整父容器高度
+    }
+    if (inputBox && selectedFile.value) {
+      containerHeight.value = inputBox.scrollHeight + 100; // 根据输入框内容动态调整父容器高度
     }
   });
 };
 
 // 上传内容到后端
 const uploadContent = async () => {
-  if (inputValue.value.trim() === '') {
+  let is_document = ref(0);
+  if (selectedFileContent.value) {
+    is_document.value = 1;
+  }
+  if (inputValue.value.trim() === '' && is_document.value === 0) {
     alert('Please input some information'); // 提示用户输入内容
     return;
   }
-  try {
-    console.log(inputValue.value.trim());
-    // 1. 让整个initialmode组件宽度压缩到pagewithoutsidebar的左半边，在父组件中codeBox要出现在右半边
-    if (isFirstTime === 0) {
-      console.log("WholeInputBox中的isFirstTime是0")
-      emit("firstUpload", ref(1));
-      isFirstTime = 1;
-    }
-    // 2. 上传输入内容给initialmode，在chatbox弹出用户输入
-    emit("uploadMessage", inputValue.value.trim());
-
-    // 3. 调用ollamaapi，左上方出现ai聊天框
-
-    // 最后输入框清零
-    inputValue.value = '';
-    containerHeight.value = 92;
-
-    // 上传文件
-    if (selectedFile.value) {
-      const formData = new FormData();
-      formData.append("file", selectedFile.value);
-
-      // 上传文件
-      const response = await fetch(`${baseURL}/upload`, {
-        method: "POST",
-        body: formData
-      });
-
-      if (response.ok) {
-        console.log("文件上传成功");
-        alert("文件上传成功");
-      } else {
-        console.error("文件上传失败");
-        alert("文件上传失败，请重试");
+  if (is_document.value === 0){
+    try {
+      console.log(inputValue.value.trim());
+      // 1. 让整个initialmode组件宽度压缩到pagewithoutsidebar的左半边，在父组件中codeBox要出现在右半边
+      if (isFirstTime === 0) {
+        console.log("WholeInputBox中的isFirstTime是0")
+        emit("firstUpload", ref(1));
+        isFirstTime = 1;
       }
+      // 2. 上传输入内容给initialmode，在chatbox弹出用户输入
+      emit("uploadMessage", inputValue.value.trim());
+
+      // 3. 调用ollamaapi，左上方出现ai聊天框
+
+      // 最后输入框清零
+      inputValue.value = '';
+      containerHeight.value = 92;
+    }
+    catch (error) {
+      // 错误处理
+      console.error('上传失败:', error);
+      alert('上传失败，请稍后重试！');
     }
   }
-  catch (error) {
-    // 错误处理
-    console.error('上传失败:', error);
-    alert('上传失败，请稍后重试！');
+  if (is_document.value === 1){
+    try {
+      console.log(inputValue.value.trim());
+      console.log(selectedFileContent.value);
+      // 1. 让整个initialmode组件宽度压缩到pagewithoutsidebar的左半边，在父组件中codeBox要出现在右半边
+      if (isFirstTime === 0) {
+        console.log("WholeInputBox中的isFirstTime是0")
+        emit("firstUpload", ref(1));
+        isFirstTime = 1;
+      }
+      // 2. 上传输入内容给initialmode，在chatbox弹出用户输入
+      emit("uploadMessage", inputValue.value.trim()+"and the code is this: "+selectedFileContent.value);
+
+      // 3. 调用ollamaapi，左上方出现ai聊天框
+
+      // 最后输入框清零
+      inputValue.value = '';
+      containerHeight.value = 92;
+      selectedFileContent.value = '';
+      selectedFile.value = null;
+    }
+    catch (error) {
+      // 错误处理
+      console.error('上传失败:', error);
+      alert('上传失败，请稍后重试！');
+    }
   }
 };
 
@@ -137,6 +153,8 @@ const handleKeyDown = (event: KeyboardEvent) => {
 };
 
 // 文件上传功能
+const selectedFileContent = ref('');  // 用于存储文件内容的字符串变量
+
 const triggerFileUpload = () => {
   // 触发文件选择框
   const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
@@ -170,9 +188,23 @@ const handleFileChange = async (event: Event) => {
 
     // 选择文件
     selectedFile.value = file;
+    containerHeight.value = 130;
     console.log("文件选择：", file);
+
+    // 使用 FileReader 读取文件内容
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      // 读取文件内容并存储在 selectedFileContent 中
+      selectedFileContent.value = reader.result as string;
+      console.log('文件内容:', selectedFileContent.value); // 打印文件内容
+    };
+
+    // 读取文件为文本
+    reader.readAsText(file);
   }
 };
+
 
 // 删除选中的文件
 const removeFile = () => {

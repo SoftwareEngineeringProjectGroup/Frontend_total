@@ -54,7 +54,8 @@ onBeforeMount(() => {
     alert("Please set an IPv4 address")
   }
   // 正确的 baseURL 应该是你后端服务的地址
-  baseURL = "http://10.252.130.135:8000/ai/back";
+  // baseURL = "http://10.252.130.135:8000/ai/back";
+  baseURL = "http://127.0.0.1:11434/api/generate"
 });
 
 let userMessage = ref('')
@@ -69,10 +70,22 @@ const uploadMessageToOllama = async (message) => {
   console.log("uploadMessage的值是:", uploadMessage.value);
   userMessage.value = uploadMessage.value;
 
+// 查找 "and the code is this: " 的位置
+  const delimiter = "and the code is this: ";
+
+// 如果 userMessage 中存在 "and the code is this: "，就提取前面的部分
+  if (userMessage.value.includes(delimiter)) {
+    const extractedMessage = userMessage.value.split(delimiter)[0];  // 获取分隔符之前的部分
+    userMessage.value = extractedMessage.trim();  // 去掉前后空格
+    userMessage.value = "***[File] is uploaded***" + userMessage.value;
+  }
+
+  console.log("提取后的 userMessage:", userMessage.value);
+
   try {
     const requestData = {
       model: "gemma2:2b",
-      prompt: "you are a programming assistant, please give the code and explanation: " + uploadMessage.value + "if there is nothing, just write a helloworld program",
+      prompt: "you are a programming assistant, please give the code and explanation: " + uploadMessage.value + "if there is a code, write the code again with explanation. if there is nothing, just write a helloworld program",
     };
 
     // 使用 fetch 来处理流式返回内容
@@ -83,7 +96,7 @@ const uploadMessageToOllama = async (message) => {
       },
       body: JSON.stringify(requestData),
     });
-
+    userMessage.value = '';
     if (!response.ok) {
       throw new Error(`Error: ${response.status}`);
     }
