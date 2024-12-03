@@ -62,7 +62,7 @@ const updateMessage = (newText) => {
   }
   // 添加新的流消息
   addMessage(newText, false, true);
-  console.log("NewText+" + newText);
+  console.log("NewText + " + newText);
 };
 
 // 监听父组件传递的 message 属性变化
@@ -83,7 +83,7 @@ watch(
       if (newMsg) {
         // 更新流内容
         currentResponse.value += newMsg;
-        console.log("currentResponse.value" + currentResponse.value)
+        console.log("currentResponse.value: " + currentResponse.value);
 
         // 判断是否是第一次更新流消息
         if (isFirstMsg.value) {
@@ -103,7 +103,7 @@ watch(
             updateMessage(currentResponse.value);
           } else {
             // 继续拼接解释内容
-            currentExplanation.value += newMsg;
+            currentExplanation.value += newMsg; // 拼接新内容到解释部分
           }
 
           // 清空当前流响应，准备下一次拼接
@@ -112,6 +112,7 @@ watch(
 
         // 当流传输完成时，添加完整消息
         if (props.isComplete) {
+          // 如果当前有解释内容，进行最后一次更新
           if (currentExplanation.value) {
             updateMessage(currentExplanation.value);
             currentExplanation.value = ''; // 清空当前的解释内容
@@ -123,6 +124,7 @@ watch(
     },
     { immediate: true }
 );
+
 
 // 渲染 Markdown 内容
 const md = new MarkdownIt({
