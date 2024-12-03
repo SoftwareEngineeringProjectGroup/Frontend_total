@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { onMounted, watch, ref } from 'vue';
+import { onMounted, watch, ref , defineExpose} from 'vue';
 import * as echarts from 'echarts';
 
 const props = defineProps({
@@ -115,6 +115,36 @@ const selectFood = (food) => {
   selectedFood.value = food;
   initChart(food);
 };
+
+// 随机生成食物数据
+const generateRandomFood = () => {
+  const randomName = `Food ${Math.floor(Math.random() * 1000)}`;  // 随机食物名称
+  const categories = ['Fruit', 'Vegetable', 'Meat', 'Poultry', 'Grain', 'Dairy', 'Nuts', 'Fish'];
+  const randomCategory = categories[Math.floor(Math.random() * categories.length)];  // 随机选择类别
+
+  // 随机生成营养成分
+  const randomNutrients = {
+    Protein: Math.floor(Math.random() * 50),
+    Fat: Math.floor(Math.random() * 30),
+    Carbohydrates: Math.floor(Math.random() * 60),
+    Fiber: Math.floor(Math.random() * 10),
+    Sugars: Math.floor(Math.random() * 30),
+  };
+
+  return { name: randomName, category: randomCategory, nutrients: randomNutrients };
+};
+
+// 更新饼图
+const updateChart = async () => {
+  const randomFood = generateRandomFood();  // 随机生成食物数据
+  selectedFood.value = randomFood;
+  initChart(randomFood);  // 更新饼图
+};
+
+// 暴露给父组件的函数
+defineExpose({
+  updateChart
+});
 
 onMounted(() => {
   if (foodData.value.length > 0) {
