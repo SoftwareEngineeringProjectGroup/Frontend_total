@@ -60,9 +60,10 @@
         <div v-if="currentView === 'visualization'" class="visualization-background">
           <!-- 直接显示饼图，不需要按钮 -->
           <div v-if="chartType === 'pie'" class="chart">
-            <ChartComponent :type="chartType" />
+            <ChartComponent :type="chartType" ref="chartComponentRef"/>
           </div>
         </div>
+        <button @click="updateChartWithRandomFood">test</button>
 
         <!-- 图片识别页面 -->
         <div v-if="currentView === 'photo-recognition'" class="photo-recognition-background">

@@ -136,6 +136,7 @@ const generateRandomFood = () => {
 
 // 更新饼图
 const updateChart = async () => {
+  console.log("chartComponentRef已被调用")
   const randomFood = generateRandomFood();  // 随机生成食物数据
   selectedFood.value = randomFood;
   initChart(randomFood);  // 更新饼图
