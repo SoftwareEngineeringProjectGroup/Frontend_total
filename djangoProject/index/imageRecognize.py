@@ -95,7 +95,7 @@ def get_car(base,tip=True):
     c = time.time()
     # print("log:", b - a)
     # print("get", c - b)
-    print(result["result"][0]["name"])
+    print("car: ",result["result"][0]["name"])
     return result["result"][0]["name"]
 
 
@@ -151,7 +151,7 @@ def get_plant(base,tip=True):
     c = time.time()
     # print("log:", b - a)
     # print("get", c - b)
-    print(result["result"][0]["name"])
+    print("plant",result["result"][0]["name"])
     return result["result"][0]["name"]
 
 
@@ -182,5 +182,5 @@ def get_animal(base,tip=True):
     c = time.time()
     # print("log:", b - a)
     # print("get", c - b)
-    print(result["result"][0]["name"])
+    print("animal: ",result["result"][0]["name"])
     return result["result"][0]["name"]

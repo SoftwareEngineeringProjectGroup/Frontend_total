@@ -330,6 +330,19 @@ const increaseMargin = () => {
     }
   }, 20); // 每 30 毫秒调整10
 };
+
+import {useRouter} from 'vue-router'
+
+const router = useRouter();
+
+onBeforeMount(() => {
+  if (!store.isPlayed) redirectToExample()
+});
+
+const redirectToExample = () => {
+  store.setisPlayed(true)
+  router.push({name: 'DietitianIntro'});
+};
 </script>
 
 
