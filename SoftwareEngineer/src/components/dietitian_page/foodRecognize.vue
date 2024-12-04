@@ -353,7 +353,7 @@ video {
   margin: 2px auto;
   padding: 15px;
   border-radius: 15px;
-  max-height: 700px;
+  max-height: 650px;
   font-size: 16px;
   overflow: auto;
 }

@@ -23,6 +23,7 @@ declare module 'vue' {
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
     ElMenuItemGroup: typeof import('element-plus/es')['ElMenuItemGroup']
     ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
+    FoodRecognize: typeof import('./src/components/dietitian_page/foodRecognize.vue')['default']
     Gather: typeof import('./src/components/home_page/gather.vue')['default']
     Gatherf: typeof import('./src/components/feedback_page/gatherf.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
