@@ -79,9 +79,9 @@ def connect_internet(request):
     if request.method == 'POST':
         # 获取请求中的数据
         translatorzh = Translator(to_lang="zh")
-        translatoren=Translator(to_lang="en")
+        translatoren = Translator(to_lang="en")
         user_input = translatorzh.translate(json.loads(request.body).get('prompt', ''))
-        print(user_input)
+        print("ai-internet: ", user_input)
 
         # 设置流式API的URL和请求信息
         url = "https://spark-api-open.xf-yun.com/v1/chat/completions"
@@ -90,7 +90,7 @@ def connect_internet(request):
             "model": "generalv3.5",
             "messages": [
                 {"role": "system", "content": ""},
-                {"role": "user", "content": user_input+",用英语回复我"}
+                {"role": "user", "content": user_input + ",用英语回复我"}
             ],
             "stream": True
         }

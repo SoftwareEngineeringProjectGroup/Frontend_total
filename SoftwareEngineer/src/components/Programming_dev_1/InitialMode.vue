@@ -12,7 +12,7 @@
           overflowY: 'auto'
         }"
     >
-      <chatBox :message="userMessage" :msg="responseMessage" :isComplete="isComplete"/>
+      <chatBox :message="userMessage" :msg="responseMessage" :isComplete="isComplete" :is_complete="finalmessage"/>
     </div>
     <div
         class="content"
@@ -54,13 +54,14 @@ onBeforeMount(() => {
     alert("Please set an IPv4 address")
   }
   // 正确的 baseURL 应该是你后端服务的地址
-  baseURL = "http://10.252.130.135:8000/ai/back";
+  // baseURL = "http://10.252.130.135:8000/ai/back";
+  baseURL = stateStore.baseUrl+"/ai/back";
 });
 
 let userMessage = ref('')
 let responseMessage = ref('')
 let isComplete = ref(false);
-
+let finalmessage = ref('');
 let uploadMessage = ref("");
 
 // 定义上传消息到 Ollama 的函数
@@ -69,10 +70,22 @@ const uploadMessageToOllama = async (message) => {
   console.log("uploadMessage的值是:", uploadMessage.value);
   userMessage.value = uploadMessage.value;
 
+  // 查找 "and the code is this: " 的位置
+  const delimiter = "and the code is this: ";
+
+  // 如果 userMessage 中存在 "and the code is this: "，就提取前面的部分
+  if (userMessage.value.includes(delimiter)) {
+    const extractedMessage = userMessage.value.split(delimiter)[0];  // 获取分隔符之前的部分
+    userMessage.value = extractedMessage.trim();  // 去掉前后空格
+    userMessage.value = "***[File is uploaded]***   " + userMessage.value;
+  }
+
+  console.log("提取后的 userMessage:", userMessage.value);
+
   try {
     const requestData = {
       model: "gemma2:2b",
-      prompt: "you are a programming assistant, please give the code and explanation: " + uploadMessage.value + "if there is nothing, just write a helloworld program",
+      prompt: "you are a programming assistant, please give the code and explanation: " + uploadMessage.value + "if there is a code, write the code again with explanation. if there is nothing, just write a helloworld program",
     };
 
     // 使用 fetch 来处理流式返回内容
@@ -83,7 +96,6 @@ const uploadMessageToOllama = async (message) => {
       },
       body: JSON.stringify(requestData),
     });
-
     if (!response.ok) {
       throw new Error(`Error: ${response.status}`);
     }
@@ -107,7 +119,14 @@ const uploadMessageToOllama = async (message) => {
           const jsonChunks = chunk.split('\n').filter(line => line.trim() !== ''); // 过滤掉空行
           jsonChunks.forEach(jsonChunk => {
             try {
-              const parsedChunk = JSON.parse(jsonChunk);
+              let parsedChunk;
+              try {
+                parsedChunk = JSON.parse(jsonChunk);
+              } catch (error){
+                return;
+              }
+
+              console.log("Received chunk:", chunk);
               if (parsedChunk.response) {
                 accumulatedResponse.value += parsedChunk.response; // 拼接响应内容
                 // 处理并提取代码块
@@ -136,6 +155,8 @@ const uploadMessageToOllama = async (message) => {
               }
             } catch (error) {
               console.error('Error parsing JSON chunk:', error);
+              // 跳过这一条无效的 jsonChunk
+              return;  // 跳过当前无效的 jsonChunk
             }
           });
         }
@@ -149,8 +170,9 @@ const uploadMessageToOllama = async (message) => {
       } else if (longestCode) {
         responseMessage.value = accumulatedResponse.value.replace(longestCode, '').trim();
       }
-      // responseMessage.value = accumulatedResponse.value.replace("```", '').trim();
       console.log('所有内容已接收，最终的 responseMessage:', responseMessage.value);
+      finalmessage.value = responseMessage.value;
+      userMessage.value = '';
     }
   } catch (error) {
     // 错误处理
@@ -158,7 +180,6 @@ const uploadMessageToOllama = async (message) => {
     alert('上传失败，请稍后重试！');
   }
 };
-
 
 
 // 提取 Markdown 格式中的代码块及其语言
