@@ -151,7 +151,7 @@ const sendAudioToApi = async (audioBlob: any) => {
 
   // 配置 fetch 选项
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000); // 10秒后中止请求
+  const timeoutId = setTimeout(() => controller.abort(), 7000); // 10秒后中止请求
 
   const options = {
     method: 'POST',
