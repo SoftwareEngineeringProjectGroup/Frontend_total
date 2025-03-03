@@ -95,7 +95,7 @@ def connect_internet(request):
             "stream": True
         }
         headers = {
-            "Authorization": "Bearer HOhEcQykmTZwwUCQrpvX:PhTphCZWLLpRenOihoHY"
+            "Authorization": ""
         }
 
         a = time.time()

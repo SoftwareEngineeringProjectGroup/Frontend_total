@@ -75,9 +75,9 @@ def recognition_image(request):
 
 def get_car(base, tip=True):
     # 设置App ID、API Key、Secret Key
-    APP_ID = '116492337'
-    API_KEY = 'WMu29FmfSnE8RmTb0FnhXdEX'
-    SECRET_KEY = 'duodCnpj8EhDiDqthBHdIb6ScjuIbYK1'
+    APP_ID = ''
+    API_KEY = ''
+    SECRET_KEY = ''
 
     # 初始化AipOcr对象
     client = AipImageClassify(APP_ID, API_KEY, SECRET_KEY)
@@ -130,9 +130,9 @@ def get_name(base, prompt):
 
 def get_plant(base, tip=True):
     # 设置App ID、API Key、Secret Key
-    APP_ID = '116492337'
-    API_KEY = 'WMu29FmfSnE8RmTb0FnhXdEX'
-    SECRET_KEY = 'duodCnpj8EhDiDqthBHdIb6ScjuIbYK1'
+    APP_ID = ''
+    API_KEY = ''
+    SECRET_KEY = ''
 
     # 初始化AipOcr对象
     client = AipImageClassify(APP_ID, API_KEY, SECRET_KEY)
@@ -163,9 +163,9 @@ def get_plant(base, tip=True):
 
 def get_animal(base, tip=True):
     # 设置App ID、API Key、Secret Key
-    APP_ID = '116492337'
-    API_KEY = 'WMu29FmfSnE8RmTb0FnhXdEX'
-    SECRET_KEY = 'duodCnpj8EhDiDqthBHdIb6ScjuIbYK1'
+    APP_ID = ''
+    API_KEY = ''
+    SECRET_KEY = ''
 
     # 初始化AipOcr对象
     client = AipImageClassify(APP_ID, API_KEY, SECRET_KEY)
@@ -194,9 +194,9 @@ def get_animal(base, tip=True):
 
 def get_food(base, tip=True):
     # 设置App ID、API Key、Secret Key
-    APP_ID = '116491847'
-    API_KEY = 'jpc9DXCrVhNYnMwYInFfBOpq'
-    SECRET_KEY = 'KQjLTdmVA7ZxSNvY1LaUzuytAkArve73'
+    APP_ID = ''
+    API_KEY = ''
+    SECRET_KEY = ''
 
     # 初始化AipOcr对象
     client = AipImageClassify(APP_ID, API_KEY, SECRET_KEY)
